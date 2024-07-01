@@ -1,5 +1,5 @@
 class ChocolateFactory {
-  constructor({ id, name, workingHours, status, location, logo, rating }) {
+  constructor({ id, name, workingHours, status, location, logo, rating, managerId }) {
     this.id = id || '';
     this.name = name || '';
     this.workingHours = workingHours || '';
@@ -7,6 +7,7 @@ class ChocolateFactory {
     this.location = location || '';
     this.logo = logo || '';
     this.rating = rating || '';
+    this.managerId = managerId || '';
   }
 
   toCSV() {
@@ -17,7 +18,8 @@ class ChocolateFactory {
       this.status,
       this.location,
       this.logo,
-      this.rating
+      this.rating,
+      this.managerId
     ].join('|');
   }
 
@@ -30,7 +32,8 @@ class ChocolateFactory {
       status: fields[3],
       location: fields[4],
       logo: fields[5],
-      rating: fields[6]
+      rating: fields[6],
+      managerId: fields[7]
     });
   }
 }

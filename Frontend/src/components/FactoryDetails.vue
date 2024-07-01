@@ -109,7 +109,7 @@ export default {
     getFactoryImage(imagePath) {
       try {
         const imageName = imagePath.split('/').pop(); 
-        return require('/web_projekat/Frontend/public/' + imageName);
+        return require('D:/web_projekat/chocolateFactory/Frontend/public/' + imageName);
       } catch (e) {
         console.error(`Image not found: ${imagePath}`);
         return '';
@@ -118,7 +118,7 @@ export default {
     getChocolateImage(imagePath) {
       try {
         const imageName = imagePath.split('/').pop(); 
-        return require('/web_projekat/Frontend/public/' + imageName);
+        return require('D:/web_projekat/chocolateFactory/Frontend/public/' + imageName);
       } catch (e) {
         console.error(`Image not found: ${imagePath}`);
         return '';

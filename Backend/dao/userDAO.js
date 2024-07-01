@@ -1,21 +1,26 @@
 const path = require("path");
-const fs = require('fs');
 const Serializer = require("../serializer/serializer");
 const User = require("../models/User");
+const fs = require('fs');
 
 class UserDAO {
   constructor() {
     this.filePath = path.join(__dirname, "../data/users.csv");
     this.serializer = new Serializer();
-    this.users = this.loadFromCSV();
+    this.users = this.serializer.fromCSV(this.filePath, User);
+  }
+
+  getAll() {
+    this.users = this.serializer.fromCSV(this.filePath, User);
+    return this.users.filter((user) => !user.isDeleted);
   }
 
   async createUser(userData) {
     const user = new User(userData);
-    user.id = this.getNextId();
+    user.id = this.nextId();
     await user.save();
     this.users.push(user);
-    this.saveToCSV();
+    this.serializer.toCSV(this.filePath, this.users);
     return user;
   }
 
@@ -33,7 +38,7 @@ class UserDAO {
       const updatedUser = new User({ ...this.users[userIndex], ...updateData });
       await updatedUser.save();
       this.users[userIndex] = updatedUser;
-      this.saveToCSV();
+      this.serializer.toCSV(this.filePath, this.users);
       return this.users[userIndex];
     }
     return null;
@@ -42,19 +47,28 @@ class UserDAO {
   async deleteUser(userId) {
     const userIndex = this.users.findIndex((user) => user.id === userId);
     if (userIndex !== -1) {
-      this.users.splice(userIndex, 1);
-      this.saveToCSV();
+      this.users[userIndex].isDeleted = true;
+      this.serializer.toCSV(this.filePath, this.users);
       return true;
     }
     return false;
   }
 
-  findUserByUsername(username) {
-    return this.users.find((user) => user.username === username);
+  async getUsersByRole(role) {
+    const users = this.loadFromCSV();
+    return users.filter(user => user.role === role);
   }
 
-  saveToCSV() {
-    this.serializer.toCSV(this.filePath, this.users.map(user => user.toCSV()));
+  findUserByUsername(username) {
+    return this.users.find((user) => user.username === username && !user.isDeleted);
+  }
+
+  nextId() {
+    this.users = this.serializer.fromCSV(this.filePath, User);
+    if (this.users.length < 1) {
+      return 1;
+    }
+    return Math.max(...this.users.map((u) => parseInt(u.id, 10))) + 1;
   }
 
   loadFromCSV() {
@@ -64,13 +78,6 @@ class UserDAO {
       console.log("CSV file not found.");
       return [];
     }
-  }
-
-  getNextId() {
-    const maxId = this.users.reduce((max, user) => {
-      return Math.max(max, parseInt(user.id, 10));
-    }, 0);
-    return (maxId + 1).toString();
   }
 }
 

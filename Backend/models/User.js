@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 class User {
-  constructor({ id, username, password, firstName, lastName, gender, dateOfBirth, role, purchases, cart, chocolateFactory, points, customerType }) {
+  constructor({ id, username, password, firstName, lastName, gender, dateOfBirth, role, points, customerType }) {
     this.id = id || '';
     this.username = username || '';
     this.password = password || '';
@@ -12,9 +12,6 @@ class User {
     this.gender = gender || 'Other';
     this.dateOfBirth = dateOfBirth || '';
     this.role = role || 'Customer';
-    this.purchases = purchases || [];
-    this.cart = cart || '';
-    this.chocolateFactory = chocolateFactory || '';
     this.points = points || 0;
     this.customerType = customerType || '';
   }
@@ -31,30 +28,26 @@ class User {
       this.role,
       this.points,
       this.customerType
-    ];
+    ].join('|');
   }
 
   static fromCSV(values) {
+    const fields = values.split('|');
     return new User({
-      id: values[0],
-      username: values[1],
-      password: values[2],
-      firstName: values[3],
-      lastName: values[4],
-      gender: values[5],
-      dateOfBirth: values[6],
-      role: values[7],
-      points: parseInt(values[8], 10),
-      customerType: values[9]
+      id: fields[0],
+      username: fields[1],
+      password: fields[2],
+      firstName: fields[3],
+      lastName: fields[4],
+      gender: fields[5],
+      dateOfBirth: fields[6],
+      role: fields[7],
+      points: parseInt(fields[8], 10),
+      customerType: fields[9]
     });
   }
 
-  async save() {
-    if (this.isPasswordModified || !this.passwordHashed) {
-      this.password = await bcrypt.hash(this.password, 10);
-      this.passwordHashed = true;
-    }
-
+  save() {
     const filePath = path.join(__dirname, "../data/users.csv");
 
     const users = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf-8').split('\n').filter(line => line.trim() !== '') : [];
@@ -64,7 +57,7 @@ class User {
       return fields[0] !== this.id;
     });
 
-    updatedUsers.push(this.toCSV().join('|'));
+    updatedUsers.push(this.toCSV());
 
     fs.writeFileSync(filePath, updatedUsers.join('\n'), 'utf-8');
   }
@@ -75,6 +68,7 @@ class User {
 
   static async create(userData) {
     const user = new User(userData);
+    user.password = await bcrypt.hash(user.password, 10); // Hashovanje lozinke pre čuvanja
     await user.save();
     return user;
   }

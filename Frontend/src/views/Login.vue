@@ -27,7 +27,8 @@ export default {
           password: this.password
         });
         console.log('Logged in:', response.data);
-        this.$emit('login-success', response.data);
+        const user = response.data.user;
+        this.$emit('login-success', user);
         this.$router.push('/'); // Preusmeri na početnu stranicu ili dashboard
       } catch (error) {
         console.error('Error logging in:', error);

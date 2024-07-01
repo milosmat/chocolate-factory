@@ -56,18 +56,23 @@ export default {
         await Promise.all(factories.map(async factory => {
           factory.locationAddress = await this.fetchLocationAddress(factory.location);
         }));
-        this.factories = factories; // Ažuriraj lokalno stanje sa kompletnim informacijama
+        this.factories = factories;
       } catch (error) {
         console.error('Error loading factories:', error);
       }
     },
     getFactoryImage(imagePath) {
-      try {
-        const imageName = imagePath.split('/').pop(); 
-        return require('/web_projekat/Frontend/public/' + imageName);
-      } catch (e) {
-        console.error(`Image not found: ${imagePath}`);
-        return ''; // Vrati prazan string ako slika nije nađena
+      if (!imagePath) return '';
+      if (imagePath.startsWith('uploads\\')) {
+        return `http://localhost:3000/${imagePath}`;
+      } else {
+        try {
+          const imageName = imagePath.split('/').pop(); 
+          return require('D:/web_projekat/chocolateFactory/Frontend/public/' + imageName);
+        } catch (e) {
+          console.error(`Image not found: ${imagePath}`);
+          return '';
+        }
       }
     },
     async fetchLocationAddress(id) {

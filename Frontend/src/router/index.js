@@ -7,6 +7,9 @@ import FactoryDetails from '../components/FactoryDetails.vue';
 import EditChocolate from '../components/EditChocolate.vue'; // Import EditChocolate component
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
+import CreateManager from '../components/CreateManager.vue';
+import CreateWorker from '../components/CreateWorker.vue';
+import CreateFactory from '../components/CreateFactory.vue';
 
 Vue.use(Router);
 
@@ -42,6 +45,22 @@ const router = new Router({
       path: '/register',
       name: 'Register',
       component: Register
+    },
+    {
+      path: '/create-manager',
+      name: 'CreateManager',
+      component: CreateManager
+    },
+    {
+      path: '/create-worker',
+      name: 'CreateWorker',
+      component: CreateWorker,
+      meta: { requiresAuth: true, requiresManager: true }
+    },
+    {
+      path: '/create-factory',
+      name: 'CreateFactory',
+      component: CreateFactory
     }
   ]
 });

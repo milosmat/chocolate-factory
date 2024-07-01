@@ -5,6 +5,9 @@
         <li v-if="!isLoggedIn"><router-link to="/login">Login</router-link></li>
         <li v-if="!isLoggedIn"><router-link to="/register">Register</router-link></li>
         <li v-if="isLoggedIn">{{ userRole }}: {{ username }}</li>
+        <li v-if="isLoggedIn && userRole === 'Administrator'"><router-link to="/create-manager">Create Manager</router-link></li>
+        <li v-if="isLoggedIn && userRole === 'Administrator'"><router-link to="/create-factory">Create Factory</router-link></li>
+        <li v-if="isLoggedIn && userRole === 'Manager'"><router-link to="/create-worker">Create Worker</router-link></li>
         <li v-if="isLoggedIn"><button @click="logout">Logout</button></li>
       </ul>
     </nav>
@@ -13,7 +16,6 @@
 </template>
 
 <script>
-
 export default {
   data() {
     return {
@@ -22,17 +24,28 @@ export default {
       userRole: ''
     };
   },
+  created() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const user = JSON.parse(localStorage.getItem('user'));
+      this.isLoggedIn = true;
+      this.username = user.username;
+      this.userRole = user.role;
+    }
+  },
   methods: {
     handleLoginSuccess(user) {
       this.isLoggedIn = true;
       this.username = user.username;
       this.userRole = user.role;
+      localStorage.setItem('user', JSON.stringify(user));
     },
     logout() {
       this.isLoggedIn = false;
       this.username = '';
       this.userRole = '';
-      // Here you can also clear any tokens if you use them for authentication
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       this.$router.push('/');
     }
   }

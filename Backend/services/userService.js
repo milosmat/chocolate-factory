@@ -1,4 +1,5 @@
 const userDAO = require('../dao/userDAO');
+const chocolateFactoryDAO = require('../dao/chocolateFactoryDAO');
 
 class UserService {
   async createUser(userData) {
@@ -15,6 +16,13 @@ class UserService {
 
   async updateUser(userId, updateData) {
     return await userDAO.updateUser(userId, updateData);
+  }
+
+  async getAvailableManagers() {
+    const managers = await userDAO.getUsersByRole('Manager');
+    const factories = await chocolateFactoryDAO.getAllChocolateFactories();
+    const assignedManagers = factories.map(factory => factory.managerId);
+    return managers.filter(manager => !assignedManagers.includes(manager.id));
   }
 
   async deleteUser(userId) {

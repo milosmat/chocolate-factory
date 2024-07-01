@@ -9,13 +9,22 @@ exports.createUser = async (req, res) => {
   }
 };
 
+exports.getAvailableManagers = async (req, res) => {
+  try {
+    const availableManagers = await userService.getAvailableManagers();
+    res.status(200).json(availableManagers);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 exports.getUserById = async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -24,32 +33,32 @@ exports.getUserById = async (req, res) => {
 exports.getUsers = async (req, res) => {
   try {
     const users = await userService.getUsers();
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ message: error.message });
-    }
-    };
-    
-    exports.updateUser = async (req, res) => {
-    try {
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
     const user = await userService.updateUser(req.params.id, req.body);
     if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
-    } catch (error) {
+    res.status(200).json(user);
+  } catch (error) {
     res.status(400).json({ message: error.message });
-    }
-    };
-    
-    exports.deleteUser = async (req, res) => {
-    try {
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
     const user = await userService.deleteUser(req.params.id);
     if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.json({ message: 'User deleted' });
-    } catch (error) {
+    res.status(200).json({ message: 'User deleted' });
+  } catch (error) {
     res.status(400).json({ message: error.message });
-    }
-    };
+  }
+};
