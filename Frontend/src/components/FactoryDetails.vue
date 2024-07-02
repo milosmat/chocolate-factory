@@ -9,6 +9,9 @@
       <p><strong>Ocena:</strong> {{ factory.rating }}</p>
       <img :src="getFactoryImage(factory.logo)" alt="Factory Image" />
       <h2>Čokolade</h2>
+      <div v-if="isManager">
+        <button @click="goToAddChocolate(factory.id)">Dodaj čokoladu</button>
+      </div>
       <table>
         <thead>
           <tr>
@@ -19,6 +22,7 @@
             <th>Gramaža</th>
             <th>Opis</th>
             <th>Slika</th>
+            <th>Količina</th>
             <th>Akcije</th>
           </tr>
         </thead>
@@ -31,9 +35,11 @@
             <td>{{ chocolate.weight }}g</td>
             <td>{{ chocolate.description }}</td>
             <td><img :src="getChocolateImage(chocolate.image)" alt="Chocolate Image" height="100px"/></td>
+            <td>{{ chocolate.quantity }}</td>
             <td>
-              <button @click="goToEditChocolate(chocolate.id)">Izmeni</button>
-              <button @click="deleteChocolate(chocolate.id)">Obriši</button>
+              <button v-if="isManager" @click="goToEditChocolate(chocolate.id)">Izmeni</button>
+              <button v-if="isManager" @click="deleteChocolate(chocolate.id)">Obriši</button>
+              <button v-if="isWorker" @click="editQuantity(chocolate.id)">Izmeni količinu</button>
             </td>
           </tr>
         </tbody>
@@ -44,12 +50,27 @@
           <strong>{{ comment.customer }}</strong>: {{ comment.text }} ({{ comment.rating }}/5)
         </li>
       </ul>
+      <div v-if="isManager">
+        <h2>Dodaj radnika</h2>
+        <button @click="goToAddWorker">Dodaj radnika</button>
+      </div>
     </div>
     <div v-else>
       <p>Učitavanje...</p>
     </div>
+
+    <!-- Modal za izmenu količine -->
+    <div v-if="showQuantityForm">
+      <h3>Izmeni količinu čokolade</h3>
+      <form @submit.prevent="updateQuantity">
+        <input v-model="newQuantity" type="number" placeholder="Nova količina" required />
+        <button type="submit">Sačuvaj</button>
+        <button type="button" @click="showQuantityForm = false">Otkaži</button>
+      </form>
+    </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -59,11 +80,32 @@ export default {
     return {
       factory: null,
       chocolates: [],
-      comments: []
+      comments: [],
+      currentUser: null, // dodato za praćenje ulogovanog korisnika
+      showQuantityForm: false,
+      currentChocolateId: null,
+      newQuantity: 0
     };
   },
   mounted() {
     this.fetchFactoryDetails();
+    this.fetchCurrentUser();
+  },
+  computed: {
+    isManager() {
+      console.log('Checking if user is manager:', this.currentUser);
+      return this.currentUser && this.currentUser.role === 'Manager';
+    },
+    isWorker() {
+      console.log('Checking if user is worker:', this.currentUser);
+      console.log('Factory:', this.factory);
+      if (this.currentUser && this.currentUser.role === 'Worker' && this.factory && Array.isArray(this.factory.workerIds)) {
+        console.log('Worker IDs:', this.factory.workerIds);
+        console.log('Current User ID:', this.currentUser.id);
+        return this.factory.workerIds.includes(this.currentUser.id.toString());
+      }
+      return false;
+    }
   },
   methods: {
     async fetchFactoryDetails() {
@@ -72,6 +114,7 @@ export default {
         const response = await axios.get(`/api/chocolate-factories/${factoryId}`);
         const factory = response.data;
         factory.locationAddress = await this.fetchLocationAddress(factory.location);
+        factory.workerIds = factory.workerIds ? factory.workerIds.map(id => id.trim()) : [];
         this.factory = factory;
         this.chocolates = await this.fetchChocolates(factoryId);
         this.comments = await this.fetchComments(factoryId);
@@ -106,6 +149,21 @@ export default {
         return [];
       }
     },
+    async fetchCurrentUser() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('/api/auth/current-user', {
+          headers: {
+            'x-auth-token': token
+          }
+        });
+        this.currentUser = response.data;
+        console.log('Fetched current user:', this.currentUser);
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+        this.currentUser = null;
+      }
+    },
     getFactoryImage(imagePath) {
       try {
         const imageName = imagePath.split('/').pop(); 
@@ -127,12 +185,39 @@ export default {
     goToEditChocolate(chocolateId) {
       this.$router.push({ name: 'EditChocolate', params: { id: chocolateId } });
     },
+    goToAddChocolate(factoryId) {
+      this.$router.push({ name: 'AddChocolate', params: { factoryId } });
+    },
+    goToAddWorker() {
+      const factoryId = this.factory.id; // Uzimamo ID fabrike
+      this.$router.push({ name: 'CreateWorker', params: { factoryId } }); // Prosleđujemo ID fabrike
+    },
     async deleteChocolate(chocolateId) {
       try {
         await axios.delete(`/api/chocolates/${chocolateId}`);
         this.chocolates = this.chocolates.filter(chocolate => chocolate.id !== chocolateId);
       } catch (error) {
         console.error('Error deleting chocolate:', error);
+      }
+    },
+    editQuantity(chocolateId) {
+      this.currentChocolateId = chocolateId;
+      this.showQuantityForm = true;
+    },
+    async updateQuantity() {
+      try {
+        const response = await axios.put(`/api/chocolates/${this.currentChocolateId}/quantity`, {
+          quantity: this.newQuantity
+        });
+        const updatedChocolate = response.data;
+        const index = this.chocolates.findIndex(choco => choco.id === this.currentChocolateId);
+        if (index !== -1) {
+          this.chocolates[index] = updatedChocolate;
+        }
+        this.showQuantityForm = false;
+        this.newQuantity = 0;
+      } catch (error) {
+        console.error('Error updating quantity:', error);
       }
     }
   }

@@ -1,5 +1,5 @@
 class ChocolateFactory {
-  constructor({ id, name, workingHours, status, location, logo, rating, managerId }) {
+  constructor({ id, name, workingHours, status, location, logo, rating, managerId, workerIds }) {
     this.id = id || '';
     this.name = name || '';
     this.workingHours = workingHours || '';
@@ -8,6 +8,7 @@ class ChocolateFactory {
     this.logo = logo || '';
     this.rating = rating || '';
     this.managerId = managerId || '';
+    this.workerIds = workerIds || []; // Dodata lista radnika
   }
 
   toCSV() {
@@ -19,7 +20,8 @@ class ChocolateFactory {
       this.location,
       this.logo,
       this.rating,
-      this.managerId
+      this.managerId,
+      this.workerIds.join(',') // Konvertovanje liste u string
     ].join('|');
   }
 
@@ -33,9 +35,9 @@ class ChocolateFactory {
       location: fields[4],
       logo: fields[5],
       rating: fields[6],
-      managerId: fields[7]
+      managerId: fields[7],
+      workerIds: fields[8] ? fields[8].split(',') : [] // Konvertovanje stringa nazad u listu
     });
-  }
+  }     
 }
-
 module.exports = ChocolateFactory;

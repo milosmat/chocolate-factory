@@ -1,6 +1,8 @@
 const chocolateFactoryService = require('../services/chocolateFactoryService');
+const userService = require('../services/userService'); // Dodajte ovaj import
 const multer = require('multer');
 const path = require('path');
+const auth = require('../middleware/auth');
 
 // Setup multer for file upload
 const storage = multer.diskStorage({
@@ -67,6 +69,27 @@ exports.updateChocolateFactory = async (req, res) => {
   }
 };
 
+exports.searchChocolateFactories = async (req, res) => {
+  try {
+    console.log("searchChocolateFactories method called");
+    const { name, chocolateName, location, rating, sortField, sortOrder, chocolateType, chocolateKind, openOnly } = req.query;
+    console.log("Query Params: ", { name, chocolateName, location, rating, sortField, sortOrder, chocolateType, chocolateKind, openOnly }); // Dodato za proveru query parametara
+    
+    const factories = await chocolateFactoryService.searchChocolateFactories(name, chocolateName, location, rating, sortField, sortOrder, chocolateType, chocolateKind, openOnly);
+    console.log("Factories Found: ", factories); // Dodato za proveru pronađenih fabrika
+    
+    if (!factories || factories.length === 0) {
+      console.log("No factories found");
+      return res.status(404).json({ message: 'Chocolate factory not found' });
+    }
+    
+    res.json(factories);
+  } catch (error) {
+    console.log("Error: ", error); // Dodato za proveru grešaka
+    res.status(400).json({ message: error.message });
+  }
+};
+
 exports.deleteChocolateFactory = async (req, res) => {
   try {
     const factory = await chocolateFactoryService.deleteChocolateFactory(req.params.id);
@@ -76,5 +99,20 @@ exports.deleteChocolateFactory = async (req, res) => {
     res.json({ message: 'Chocolate factory deleted' });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+exports.addWorkerToFactory = async (req, res) => {
+  const factoryId = req.params.id;
+  const { workerId } = req.body;
+  const userId = req.user.id; // Trenutno ulogovani korisnik (menadžer)
+
+  try {
+    const updatedFactory = await chocolateFactoryService.addWorkerToFactory(factoryId, workerId, userId);
+    console.log('abcd');
+    res.json({ message: 'Worker added to factory'});
+  } catch (error) {
+    console.log('sgdndsfjnvsjnd');
+    res.status(500).json({ message: error.message });
   }
 };

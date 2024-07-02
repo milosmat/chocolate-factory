@@ -37,6 +37,7 @@
         location: '',
         workingHours: '',
         logo: null,
+        rating: 0.0,
         availableManagers: [],
         selectedManagerId: null,
         showManagerForm: false,

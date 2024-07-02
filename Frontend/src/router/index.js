@@ -1,10 +1,9 @@
-// router/index.js
 import Vue from 'vue';
 import Router from 'vue-router';
 import FactoryList from '../components/FactoryList.vue';
 import AddChocolate from '../components/AddChocolate.vue';
 import FactoryDetails from '../components/FactoryDetails.vue';
-import EditChocolate from '../components/EditChocolate.vue'; // Import EditChocolate component
+import EditChocolate from '../components/EditChocolate.vue';
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import CreateManager from '../components/CreateManager.vue';
@@ -52,7 +51,7 @@ const router = new Router({
       component: CreateManager
     },
     {
-      path: '/create-worker',
+      path: '/create-worker/:factoryId',
       name: 'CreateWorker',
       component: CreateWorker,
       meta: { requiresAuth: true, requiresManager: true }

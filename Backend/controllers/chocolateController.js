@@ -59,3 +59,15 @@ exports.deleteChocolate = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.updateChocolateQuantity = async (req, res) => {
+  const chocolateId = req.params.id;
+  const { quantity } = req.body;
+
+  try {
+    const updatedChocolate = await chocolateService.updateChocolateQuantity(chocolateId, quantity);
+    res.json(updatedChocolate);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

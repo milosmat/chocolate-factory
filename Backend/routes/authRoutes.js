@@ -4,6 +4,7 @@ const userService = require('../services/userService');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { body, validationResult } = require('express-validator');
+const auth = require('../middleware/auth');
 
 // Registracija
 router.post('/register',
@@ -69,6 +70,15 @@ router.post('/login', async (req, res) => {
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+router.get('/current-user', auth, async (req, res) => {
+  try {
+    const user = await userService.getUserById(req.user.id);
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

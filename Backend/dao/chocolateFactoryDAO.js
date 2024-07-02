@@ -29,12 +29,33 @@ class ChocolateFactoryDAO {
   async updateChocolateFactory(factoryId, updateData) {
     const factoryIndex = this.factories.findIndex((factory) => factory.id === factoryId);
     if (factoryIndex !== -1) {
-      this.factories[factoryIndex] = { ...this.factories[factoryIndex], ...updateData };
+      // Kreiranje nove instance ChocolateFactory pre ažuriranja
+      const updatedFactoryData = { ...this.factories[factoryIndex], ...updateData };
+      this.factories[factoryIndex] = new ChocolateFactory(updatedFactoryData);
+  
+      // Uklanjanje nevažećih znakova i praznih ID-jeva iz workerIds polja
+      if (this.factories[factoryIndex].workerIds) {
+        this.factories[factoryIndex].workerIds = this.factories[factoryIndex].workerIds
+          .map(id => id.toString().trim())
+          .filter(id => id);  // Filtriranje praznih ID-jeva
+      }
+  
+      console.log("Updated factory:", JSON.stringify(this.factories[factoryIndex], null, 2));
+  
+      // Provera da li factory instance ima metodu toCSV pre čuvanja
+      if (typeof this.factories[factoryIndex].toCSV !== 'function') {
+        console.error('Factory instance does not have a toCSV method:', this.factories[factoryIndex]);
+        throw new Error('Factory instance is not an instance of ChocolateFactory');
+      }
+  
       this.saveToCSV();
       return this.factories[factoryIndex];
     }
     return null;
   }
+  
+  
+  
 
   async deleteChocolateFactory(factoryId) {
     const factoryIndex = this.factories.findIndex((factory) => factory.id === factoryId);

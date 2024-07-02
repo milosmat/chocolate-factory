@@ -7,5 +7,6 @@ router.get('/:id', chocolateController.getChocolateById);
 router.get('/', chocolateController.getChocolates);
 router.put('/:id', chocolateController.updateChocolate);
 router.delete('/:id', chocolateController.deleteChocolate);
+router.put('/:id/quantity', chocolateController.updateChocolateQuantity);
 
 module.exports = router;

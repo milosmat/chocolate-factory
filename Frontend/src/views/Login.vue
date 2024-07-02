@@ -27,7 +27,12 @@ export default {
           password: this.password
         });
         console.log('Logged in:', response.data);
-        const user = response.data.user;
+        const { token, user } = response.data;
+        
+        // Čuvanje tokena i podataka o korisniku u localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
         this.$emit('login-success', user);
         this.$router.push('/'); // Preusmeri na početnu stranicu ili dashboard
       } catch (error) {
