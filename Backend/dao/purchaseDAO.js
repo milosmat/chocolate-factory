@@ -28,8 +28,10 @@ class PurchaseDAO {
 
   async updatePurchase(purchaseId, updateData) {
     const purchaseIndex = this.purchases.findIndex((purchase) => purchase.id === purchaseId);
+    console.log("Purchase index:", purchaseIndex);
     if (purchaseIndex !== -1) {
       this.purchases[purchaseIndex] = new Purchase({ ...this.purchases[purchaseIndex], ...updateData });
+      console.log("Updated purchase:", JSON.stringify(this.purchases[purchaseIndex], null, 2));
       this.saveToCSV();
       return this.purchases[purchaseIndex];
     }

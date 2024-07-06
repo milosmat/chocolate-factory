@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require('fs');
 const Serializer = require("../serializer/serializer");
 const ChocolateFactory = require("../models/ChocolateFactory");
-
+const LocationDAO = require("./locationDAO");
 class ChocolateFactoryDAO {
   constructor() {
     this.filePath = path.join(__dirname, "../data/chocolateFactory.csv");
@@ -12,6 +12,7 @@ class ChocolateFactoryDAO {
 
   async createChocolateFactory(factoryData) {
     const factory = new ChocolateFactory(factoryData);
+    console.log("Factory Data: ", factory);
     factory.id = this.getNextId();
     this.factories.push(factory);
     this.saveToCSV();
@@ -29,6 +30,11 @@ class ChocolateFactoryDAO {
   async updateChocolateFactory(factoryId, updateData) {
     const factoryIndex = this.factories.findIndex((factory) => factory.id === factoryId);
     if (factoryIndex !== -1) {
+
+      if (updateData.location) {
+        await LocationDAO.updateLocation(this.factories[factoryIndex].location, updateData.location);
+        updateData.location = this.factories[factoryIndex].location;
+      }
       // Kreiranje nove instance ChocolateFactory pre ažuriranja
       const updatedFactoryData = { ...this.factories[factoryIndex], ...updateData };
       this.factories[factoryIndex] = new ChocolateFactory(updatedFactoryData);

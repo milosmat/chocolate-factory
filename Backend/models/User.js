@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 class User {
-  constructor({ id, username, password, firstName, lastName, gender, dateOfBirth, role, points, customerType }) {
+  constructor({ id, username, password, firstName, lastName, gender, dateOfBirth, role, points, customerType, isBlocked }) {
     this.id = id || '';
     this.username = username || '';
     this.password = password || '';
@@ -14,6 +14,7 @@ class User {
     this.role = role || 'Customer';
     this.points = points || 0;
     this.customerType = customerType || '';
+    this.isBlocked = isBlocked || '';
   }
 
   toCSV() {
@@ -27,7 +28,8 @@ class User {
       this.dateOfBirth,
       this.role,
       this.points,
-      this.customerType
+      this.customerType,
+      this.isBlocked
     ].join('|');
   }
 
@@ -43,7 +45,8 @@ class User {
       dateOfBirth: fields[6],
       role: fields[7],
       points: parseInt(fields[8], 10),
-      customerType: fields[9]
+      customerType: fields[9],
+      isBlocked: fields[10]
     });
   }
 

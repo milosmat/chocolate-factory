@@ -14,6 +14,7 @@ import FactoryPurchases from '../components/FactoryPurchases.vue';
 import MyCart from '../components/MyCart.vue';
 import UserProfile from '../components/UserProfile.vue';
 import UserList from '../components/UserList';
+import SuspiciousUsers from '../components/SuspiciousUsers';
 
 Vue.use(Router);
 
@@ -90,6 +91,12 @@ const router = new Router({
       path: '/users',
       name: 'UserList',
       component: UserList
+    },
+    {
+      path: '/suspicious-users',
+      name: 'SuspiciousUsers',
+      component: SuspiciousUsers,
+      meta: { requiresAuth: true, role: 'Administrator' }
     }
   ]
 });

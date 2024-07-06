@@ -36,11 +36,11 @@ class PurchaseService {
   
     // Izračunaj izgubljene bodove
     const lostPoints = (purchase.totalPrice / 1000) * 133 * 4;
-  
+    console.log('Lost points:', lostPoints);
     // Otkazivanje porudžbine
     purchase.status = 'Otkazano';
-    await purchaseDAO.updatePurchase(purchase);
-  
+    await purchaseDAO.updatePurchase(purchase.id, purchase);
+    console.log('Purchase cancelled:', purchase);
     // Ažuriraj korisničke bodove (pretpostavimo da postoji metoda za ažuriranje korisničkih bodova)
     const customer = await userDAO.getUserById(userId);
     customer.points -= lostPoints;

@@ -34,6 +34,8 @@
     data() {
       return {
         user: null,
+        newPassword: '',       // Dodato
+        confirmPassword: ''    // Dodato
       };
     },
     async created() {
@@ -42,18 +44,18 @@
     methods: {
       async fetchUserProfile() {
         try {
-            const token = localStorage.getItem('token');
-            const userId = this.$route.params.userId;
-            const response = await axios.get(`/api/users/${userId}`, {
+          const token = localStorage.getItem('token');
+          const userId = this.$route.params.userId;
+          const response = await axios.get(`/api/users/${userId}`, {
             headers: {
-                'x-auth-token': token
+              'x-auth-token': token
             }
-            });
-            this.user = response.data;
+          });
+          this.user = response.data;
         } catch (error) {
-            console.error('Error fetching user profile:', error);
+          console.error('Error fetching user profile:', error);
         }
-        },
+      },
       async updateProfile() {
         try {
           const userId = this.$route.params.userId;
@@ -65,26 +67,26 @@
       },
       async changePassword() {
         if (this.newPassword !== this.confirmPassword) {
-            alert('Šifre se ne poklapaju.');
-            return;
+          alert('Šifre se ne poklapaju.');
+          return;
         }
         try {
-            const token = localStorage.getItem('token');
-            const userId = this.$route.params.userId;
-            await axios.put(`/api/users/${userId}/change-password`, {
+          const token = localStorage.getItem('token');
+          const userId = this.$route.params.userId;
+          await axios.put(`/api/users/${userId}/change-password`, {
             password: this.newPassword
-            }, {
+          }, {
             headers: {
-                'x-auth-token': token
+              'x-auth-token': token
             }
-            });
-            alert('Šifra uspešno promenjena.');
-            this.newPassword = '';
-            this.confirmPassword = '';
+          });
+          alert('Šifra uspešno promenjena.');
+          this.newPassword = '';
+          this.confirmPassword = '';
         } catch (error) {
-            console.error('Error changing password:', error);
+          console.error('Error changing password:', error);
         }
-        }
+      }
     }
   }
   </script>

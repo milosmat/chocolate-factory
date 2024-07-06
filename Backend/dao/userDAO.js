@@ -2,6 +2,8 @@ const path = require("path");
 const Serializer = require("../serializer/serializer");
 const User = require("../models/User");
 const fs = require('fs');
+const PurchaseDAO = require('./purchaseDAO');
+const moment = require('moment');
 
 class UserDAO {
   constructor() {
@@ -13,6 +15,40 @@ class UserDAO {
   getAll() {
     this.users = this.serializer.fromCSV(this.filePath, User);
     return this.users.filter((user) => !user.isDeleted);
+  }
+
+  async getSuspiciousUsers() {
+    const purchases = await PurchaseDAO.getAllPurchases();
+    const oneMonthAgo = moment().subtract(1, 'months').toDate();
+    const suspiciousUsers = {};
+    console.log('All purchases:', purchases); // Dodato za debug
+    purchases.forEach(purchase => {
+      if (purchase.status === 'Otkazano' && new Date(purchase.dateTime) > oneMonthAgo) {
+        if (!suspiciousUsers[purchase.customer]) {
+          suspiciousUsers[purchase.customer] = 0;
+          console.log("++");
+        }
+        suspiciousUsers[purchase.customer]++;
+        console.log('Suspicious users:', suspiciousUsers[purchase.customer]); // Dodato za debug
+      }
+    });
+    console.log('Suspicious users:', suspiciousUsers); // Dodato za debug
+
+    const result = Object.keys(suspiciousUsers).filter(userId => suspiciousUsers[userId] > 5);
+    console.log('Suspicious user IDs:', result);
+    const users = this.users;
+    return users.filter(user => result.includes(user.id));
+  }
+
+  async blockUser(userId) {
+    const user = this.users.find(user => user.id === userId);
+    console.log('Blocking user:', user); // Dodato za debug
+    if (user) {
+      user.isBlocked = true;
+      this.serializer.toCSV(this.filePath, this.users);
+      return user;
+    }
+    return null;
   }
 
   async createUser(userData) {

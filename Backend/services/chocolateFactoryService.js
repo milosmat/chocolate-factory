@@ -1,10 +1,27 @@
 const chocolateFactoryDAO = require('../dao/chocolateFactoryDAO');
 const chocolateDAO = require('../dao/chocolateDAO');
+const locationService = require('./locationService');
+const ChocolateFactory = require('../models/ChocolateFactory');
 
 class ChocolateFactoryService {
   async createChocolateFactory(factoryData) {
-    return await chocolateFactoryDAO.createChocolateFactory(factoryData);
+    // Kreiraj fabriku
+    const factoryDataWithLocation = {
+      name: factoryData.name,
+      workingHours: factoryData.workingHours,
+      status: factoryData.status,
+      location: factoryData.location, // ispravno postavljen ID kreirane lokacije
+      logo: factoryData.logo,
+      rating: factoryData.rating || 0,
+      managerId: factoryData.managerId,
+      workerIds: factoryData.workerIds || []
+    };
+
+    const factory = new ChocolateFactory(factoryDataWithLocation);
+    console.log("Factory Data with Location: ", factory); // Dodato za proveru podataka o fabrici
+    return await chocolateFactoryDAO.createChocolateFactory(factory);
   }
+
 
   async getChocolateFactoryById(factoryId) {
     return await chocolateFactoryDAO.getChocolateFactoryById(factoryId);
@@ -15,10 +32,17 @@ class ChocolateFactoryService {
   }
 
   async updateChocolateFactory(factoryId, updateData) {
-    return await chocolateFactoryDAO.updateChocolateFactory(factoryId, updateData);
+    const { location, ...restUpdateData } = updateData;
+    if (location) {
+      const factory = await chocolateFactoryDAO.getChocolateFactoryById(factoryId);
+      await locationService.updateLocation(factory.locationId, location);
+    }
+    return await chocolateFactoryDAO.updateChocolateFactory(factoryId, restUpdateData);
   }
 
   async deleteChocolateFactory(factoryId) {
+    const factory = await chocolateFactoryDAO.getChocolateFactoryById(factoryId);
+    await locationService.deleteLocation(factory.locationId);
     return await chocolateFactoryDAO.deleteChocolateFactory(factoryId);
   }
 

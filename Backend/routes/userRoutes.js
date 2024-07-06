@@ -9,5 +9,6 @@ router.get('/', authMiddleware, userController.getUsers);
 router.put('/:id', authMiddleware, userController.updateUser);
 router.delete('/:id', authMiddleware, userController.deleteUser);
 router.put('/:userId/change-password', userController.changePassword);
-
+router.get('/rest/suspicious-users', authMiddleware, userController.getSuspiciousUsers);
+router.put('/block-user/:id', authMiddleware, userController.blockUser);
 module.exports = router;

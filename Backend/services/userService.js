@@ -18,6 +18,14 @@ class UserService {
   async updateUser(userId, updateData) {
     return await userDAO.updateUser(userId, updateData);
   }
+  
+  async getSuspiciousUsers() {
+    return await userDAO.getSuspiciousUsers();
+  }
+
+  async blockUser(userId) {
+    return await userDAO.blockUser(userId);
+  }
 
   async getAvailableManagers() {
     const managers = await userDAO.getUsersByRole('Manager');

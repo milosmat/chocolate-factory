@@ -1,5 +1,5 @@
 const chocolateFactoryService = require('../services/chocolateFactoryService');
-const userService = require('../services/userService'); // Dodajte ovaj import
+const locationService = require('../services/locationService'); // Dodajte ovaj import
 const multer = require('multer');
 const path = require('path');
 const auth = require('../middleware/auth');
@@ -20,15 +20,20 @@ exports.createChocolateFactory = [
   upload.single('logo'),
   async (req, res) => {
     try {
-      const { name, location, workingHours, managerId } = req.body;
+      const factoryData = req.body;
       const logo = req.file ? req.file.path : null;
+      factoryData.logo = logo;
 
-      const existingFactory = await chocolateFactoryService.getFactoryByManagerId(managerId);
-      if (existingFactory) {
-        return res.status(400).json({ message: 'Manager is already assigned to another factory' });
+      // Kreiraj lokaciju pre kreiranja fabrike
+      const locationData = JSON.parse(factoryData.location);
+      const location = await locationService.createLocation(locationData);
+
+      if (!location) {
+        throw new Error('Failed to create location');
       }
 
-      const factory = await chocolateFactoryService.createChocolateFactory({ name, location, workingHours, logo, managerId });
+      factoryData.location = location.id;
+      const factory = await chocolateFactoryService.createChocolateFactory(factoryData);
       res.status(201).json(factory);
     } catch (error) {
       res.status(400).json({ message: error.message });

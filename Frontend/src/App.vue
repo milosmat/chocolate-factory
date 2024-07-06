@@ -20,7 +20,7 @@
         <li v-if="isLoggedIn && userRole === 'Manager'"><router-link to="/create-worker">Create Worker</router-link></li>
         <li v-if="isLoggedIn && userRole === 'Customer'"><router-link :to="`/user/${userId}/my-purchases`">My purchases</router-link></li>
         <li v-if="isLoggedIn && userRole === 'Customer'"><router-link :to="`/user/${userId}/my-cart`">My Cart</router-link></li>
-        
+        <li v-if="isLoggedIn && userRole === 'Administrator'"><router-link to="/suspicious-users">Suspicious Users</router-link></li>
         <!-- Prikazivanje linka za profil i dugmeta za odjavu ako je korisnik prijavljen -->
         <li v-if="isLoggedIn"><router-link :to="`/user/${userId}/profile`">My Profile</router-link></li>
         <li v-if="isLoggedIn"><button @click="logout">Logout</button></li>

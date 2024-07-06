@@ -72,3 +72,30 @@ exports.changePassword = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.getSuspiciousUsers = async (req, res) => {
+  console.log('Received request for suspicious users');
+  try {
+    const suspiciousUsers = await userService.getSuspiciousUsers();
+    console.log('Suspicious users:', suspiciousUsers); // Dodato za debug
+    res.status(200).json(suspiciousUsers);
+  } catch (error) {
+    console.error('Error fetching suspicious users:', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.blockUser = async (req, res) => {
+  console.log('Received request to block user:', req.params.id); // Dodato za debug
+  try {
+    const user = await userService.blockUser(req.params.id);
+    console.log('Blocked user:', user); // Dodato za debug
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ message: 'User blocked successfully' });
+  } catch (error) {
+    console.error('Error blocking user:', error);
+    res.status(400).json({ message: error.message });
+  }
+};

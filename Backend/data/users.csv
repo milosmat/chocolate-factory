@@ -1,6 +1,8 @@
-1|a|$2b$10$uxN7xQ/mkxScqUlNUHGwQOKWjNZfmPUBsrQAJ6MlgCZAhWVt5DVZm|asdf|asdf|M|2001-01-08|Customer|0|
-2|admin|$2b$12$myELxwtZG5QZzOUV8q5kHOEtl4yNihwWq4O7EqQvU268yQRIsy/JW|Admin|User|M|1970-01-01|Administrator|0|
-3|menadzer|$2a$10$XUE65AUxdA/wxU.5NyUeIebZCl.LYJng5wkacCCUKLdfJJsYwcg66|mena|dzer|M|1999-01-04|Manager|0|
-4|radnik|$2b$10$D3wZbV.krMDPm7ARbU6lgOhn0Z4aswWn/l4vc80cYRubEXC9DJVQm|rad|nik|M|1998-01-05|Worker|0|
-5|worker|$2b$10$zWZS.z2LQH22ZnIRUOGGreQ4AvKz9UaAoCrxuyceIO734UT0LCV.y|wor|ker|M|2003-06-10|Worker|0|
-6|customer|$2b$10$rS/cnf1i164d6SqlHHMD0e32OIYbJKmZldK14EH/ULr7asx04q4K6|custo|mer|M|2004-01-07|Customer|12|
+1|a|$2b$10$uxN7xQ/mkxScqUlNUHGwQOKWjNZfmPUBsrQAJ6MlgCZAhWVt5DVZm|asdf|asdf|M|2001-01-08|Customer|0||
+2|admin|$2b$12$myELxwtZG5QZzOUV8q5kHOEtl4yNihwWq4O7EqQvU268yQRIsy/JW|Admin|User|M|1970-01-01|Administrator|0||
+3|menadzer|$2a$10$XUE65AUxdA/wxU.5NyUeIebZCl.LYJng5wkacCCUKLdfJJsYwcg66|mena|dzer|M|1999-01-04|Manager|0||
+4|radnik|$2b$10$D3wZbV.krMDPm7ARbU6lgOhn0Z4aswWn/l4vc80cYRubEXC9DJVQm|rad|nik|M|1998-01-05|Worker|0||
+5|worker|$2b$10$zWZS.z2LQH22ZnIRUOGGreQ4AvKz9UaAoCrxuyceIO734UT0LCV.y|wor|ker|M|2003-06-10|Worker|0||
+6|customer|$2b$10$rS/cnf1i164d6SqlHHMD0e32OIYbJKmZldK14EH/ULr7asx04q4K6|custo|mer|M|2004-01-07|Customer|0||
+7|menadzer2|$2b$10$wtTFGSTNsWlD3Em9gQavPuIqf5GXlaWyBLgrhXL2T1ZTS2hR4stNy|marko|markovic|Muski|2002-04-03|Manager|0||
+8|kupac|$2b$10$mgodlMyG.gkFFwMGtopqseNA8pExBhBYCL6pTgjhxngYWoBGBDnra|ku|pac|muski|2002-04-03|Customer|0||true
