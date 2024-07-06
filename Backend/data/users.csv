@@ -6,3 +6,5 @@
 6|customer|$2b$10$rS/cnf1i164d6SqlHHMD0e32OIYbJKmZldK14EH/ULr7asx04q4K6|custo|mer|M|2004-01-07|Customer|60|1|
 7|menadzer2|$2b$10$wtTFGSTNsWlD3Em9gQavPuIqf5GXlaWyBLgrhXL2T1ZTS2hR4stNy|marko|markovic|Muski|2002-04-03|Manager|0||
 8|kupac|$2b$10$mgodlMyG.gkFFwMGtopqseNA8pExBhBYCL6pTgjhxngYWoBGBDnra|ku|pac|muski|2002-04-03|Customer|0||true
+9|manager2|$2b$10$kcevDEA9KMieEwsVvsLsie9bAptYApZcnwApCHJ7QdvH6ATMp22Em|mana|ger|Muski|2001-01-02|Manager|0||
+10|radnik|$2b$10$zu9C31cw46MTrPU4.qpOR.OeIpX1/7Au7BJMAmTBXtMWoQq95KqAi|mar|ko|Muski|2002-02-05|Worker|0||

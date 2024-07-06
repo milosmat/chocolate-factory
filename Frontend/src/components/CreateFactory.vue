@@ -8,9 +8,9 @@
         <p>Latitude: {{ location.latitude }}</p>
         <p>Longitude: {{ location.longitude }}</p>
       </div>
-      <input v-model="location.street" placeholder="Street" required readonly />
-      <input v-model="location.city" placeholder="City" required readonly />
-      <input v-model="location.postalCode" placeholder="Postal Code" required readonly />
+      <input v-model="location.street" @change="geocodeAddress" placeholder="Street" required />
+      <input v-model="location.city" @change="geocodeAddress" placeholder="City" required />
+      <input v-model="location.postalCode" @change="geocodeAddress" placeholder="Postal Code" required />
       <input v-model="workingHours" placeholder="Working Hours" required />
       <input type="file" @change="onFileChange" required />
       <select v-model="selectedManagerId" required>
@@ -18,7 +18,7 @@
           {{ manager.username }}
         </option>
       </select>
-      <button v-if="!selectedManagerId" type="button" @click="showManagerForm = true">Create New Manager</button>
+      <button v-if="!selectedManagerId" type="button" @click="redirectToCreateManager">Create New Manager</button>
       <div v-if="showManagerForm">
         <h2>Create New Manager</h2>
         <input v-model="newManager.username" placeholder="Username" required />
@@ -152,12 +152,53 @@ export default {
       this.location.longitude = longitude;
       this.location.latitude = latitude;
     },
+    async geocodeAddress() {
+      if (this.location.street && this.location.city && this.location.postalCode) {
+        const address = `${this.location.street}, ${this.location.city}, ${this.location.postalCode}`;
+        try {
+          const response = await axios.get(`https://api.opencagedata.com/geocode/v1/json?q=${address}&key=f334aebae0db433187505ef2b720430c`);
+          if (response.data.results.length > 0) {
+            const coordinates = response.data.results[0].geometry;
+            this.location.latitude = coordinates.lat;
+            this.location.longitude = coordinates.lng;
+            this.setMarker(this.location.longitude, this.location.latitude);
+          }
+        } catch (error) {
+          console.error('Error geocoding address:', error);
+        }
+      }
+    },
+    redirectToCreateManager() {
+      this.$router.push('/create-manager');
+    },
     async createFactory() {
       const formData = new FormData();
       formData.append('name', this.name);
       formData.append('workingHours', this.workingHours);
       formData.append('logo', this.logo);
-      formData.append('managerId', this.selectedManagerId);
+
+      if (this.showManagerForm) {
+        if (this.newManager.password !== this.newManager.confirmPassword) {
+          console.error('Passwords do not match!');
+          this.errorMessage = 'Passwords do not match';
+          return;
+        }
+
+        try {
+          const managerResponse = await axios.post('http://localhost:3000/api/auth/register', {
+            ...this.newManager,
+            role: 'Manager'
+          });
+          this.selectedManagerId = managerResponse.data.id;
+          formData.append('managerId', this.selectedManagerId); // Ensure managerId is appended after setting it
+        } catch (error) {
+          console.error('Error creating new manager:', error);
+          this.errorMessage = 'Error creating new manager';
+          return;
+        }
+      } else {
+        formData.append('managerId', this.selectedManagerId);
+      }
 
       const locationData = {
         street: this.location.street,
@@ -170,24 +211,6 @@ export default {
       console.log("Location Data being sent:", locationData); // Dodato za proveru podataka lokacije pre slanja
 
       formData.append('location', JSON.stringify(locationData));
-
-      if (!this.selectedManagerId) {
-        if (this.newManager.password !== this.newManager.confirmPassword) {
-          console.error('Passwords do not match!');
-          return;
-        }
-
-        try {
-          const managerResponse = await axios.post('http://localhost:3000/api/auth/register', {
-            ...this.newManager,
-            role: 'Manager'
-          });
-          formData.append('managerId', managerResponse.data.id);
-        } catch (error) {
-          console.error('Error creating new manager:', error);
-          return;
-        }
-      }
 
       try {
         const response = await axios.post('http://localhost:3000/api/chocolate-factories', formData, {

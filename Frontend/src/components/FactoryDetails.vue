@@ -6,6 +6,7 @@
       <p><strong>Radno vreme:</strong> {{ factory.workingHours }}</p>
       <p><strong>Status:</strong> {{ factory.status }}</p>
       <p><strong>Lokacija:</strong> {{ factory.locationAddress }}</p>
+      <div id="map" class="map"></div>
       <p><strong>Ocena:</strong> {{ factory.rating }}</p>
       <img :src="getFactoryImage(factory.logo)" alt="Factory Image" />
       <h2>Čokolade</h2>
@@ -106,6 +107,15 @@
 
 <script>
 import axios from 'axios';
+import 'ol/ol.css';
+import { Map, View } from 'ol';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
+import { OSM } from 'ol/source';
+import { Point } from 'ol/geom';
+import { fromLonLat } from 'ol/proj';
+import { Vector as VectorSource } from 'ol/source';
+import { Feature } from 'ol';
+import { Style, Icon } from 'ol/style';
 
 export default {
   data() {
@@ -121,7 +131,8 @@ export default {
       selectedQuantities: {}, // Dodato za praćenje količina čokolada
       newCommentText: '',
       newCommentRating: null,
-      approvedPurchases: []
+      approvedPurchases: [],
+      map: null
     };
   },
   mounted() {
@@ -172,6 +183,9 @@ export default {
         await this.fetchCurrentUser();
         this.chocolates = await this.fetchChocolates(factoryId);
         this.comments = await this.fetchComments(factoryId);
+        this.$nextTick(() => {
+          this.initMap(factory.location); // Initialize map with factory location
+        });
       } catch (error) {
         console.error('Error loading factory details:', error);
       }
@@ -355,7 +369,53 @@ export default {
       } catch (error) {
         console.error('Error submitting comment:', error);
       }
-    }
+    },
+    async initMap(locationId) {
+      try {
+        const response = await axios.get(`/api/locations/${locationId}`);
+        const location = response.data;
+        console.log('Location:', location);
+        
+        const transformedCoordinates = fromLonLat([location.latitude, location.longitude]);
+        console.log('Transformed coordinates:', transformedCoordinates);
+
+        const map = new Map({
+          target: 'map',
+          layers: [
+            new TileLayer({
+              source: new OSM(),
+            }),
+          ],
+          view: new View({
+            center: transformedCoordinates,
+            zoom: 15,
+          }),
+        });
+
+        const vectorSource = new VectorSource({
+          features: [
+            new Feature({
+              geometry: new Point(transformedCoordinates),
+            }),
+          ],
+        });
+
+        const vectorLayer = new VectorLayer({
+          source: vectorSource,
+          style: new Style({
+            image: new Icon({
+              src: '/locationMarker.png', // Ensure the path is correct
+              anchor: [0.5, 1],
+            }),
+          }),
+        });
+
+        map.addLayer(vectorLayer);
+        this.map = map;
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
+    },
   }
 }
 </script>
@@ -375,6 +435,11 @@ th, td {
   border: 1px solid #ccc; /* Dodan border na ćelije tabele */
   padding: 8px;
   text-align: left;
+}
+.map {
+  width: 100%;
+  height: 400px;
+  margin-bottom: 20px;
 }
 .modal-overlay {
   position: fixed;
