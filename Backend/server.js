@@ -8,6 +8,10 @@ const routes = require('./routes');
 const authRoutes = require('./routes/authRoutes');
 const chocolateRoutes = require('./routes/chocolateRoutes');
 const chocolateFactoryRoutes = require('./routes/chocolateFactoryRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const purchaseRoutes = require('./routes/purchaseRoutes');
+const authenticateJWT = require('./middleware/auth');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -24,6 +28,8 @@ app.use('/api/chocolates', chocolateRoutes);
 app.use('/api/factories', chocolateFactoryRoutes);
 app.use('/uploads', express.static(uploadsDir));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/carts', authenticateJWT, cartRoutes);
+app.use('/api/purchases', authenticateJWT, purchaseRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

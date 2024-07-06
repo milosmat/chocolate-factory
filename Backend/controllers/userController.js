@@ -62,3 +62,13 @@ exports.deleteUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const newPassword = req.body.password;
+    await userService.changePassword(userId, newPassword);
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

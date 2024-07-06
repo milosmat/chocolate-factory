@@ -1,10 +1,11 @@
 class Comment {
-  constructor({ id, customer, factory, text, rating }) {
+  constructor({ id, customer, factory, text, rating, status }) {
     this.id = id || '';
     this.customer = customer || '';
     this.factory = factory || '';
     this.text = text || '';
     this.rating = parseFloat(rating) || 0;
+    this.status = status || '';
   }
 
   toCSV() {
@@ -13,7 +14,8 @@ class Comment {
       this.customer,
       this.factory,
       this.text,
-      this.rating
+      this.rating,
+      this.status
     ].join('|');
   }
 
@@ -24,7 +26,8 @@ class Comment {
       customer: fields[1],
       factory: fields[2],
       text: fields[3],
-      rating: parseFloat(fields[4])
+      rating: parseFloat(fields[4]),
+      status: fields[5]
     });
   }
 }

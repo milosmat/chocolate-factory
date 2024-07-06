@@ -63,3 +63,15 @@ exports.deleteComment = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.updateCommentStatus = async (req, res) => {
+  try {
+    const comment = await commentService.updateCommentStatus(req.params.id, req.body.status);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    res.json(comment);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

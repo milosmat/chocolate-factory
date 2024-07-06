@@ -10,6 +10,9 @@
       <img :src="getFactoryImage(factory.logo)" alt="Factory Image" />
       <h2>Čokolade</h2>
       <div v-if="isManager">
+        <div v-if="isManagerOfFactory">
+          <button @click="goToPurchases(factory.id)">Pregledaj kupovine</button>
+        </div>
         <button @click="goToAddChocolate(factory.id)">Dodaj čokoladu</button>
       </div>
       <table>
@@ -27,7 +30,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="chocolate in chocolates" :key="chocolate.id">
+          <tr v-for="chocolate in filteredChocolates" :key="chocolate.id">
             <td>{{ chocolate.name }}</td>
             <td>{{ chocolate.price }} RSD</td>
             <td>{{ chocolate.type }}</td>
@@ -40,16 +43,43 @@
               <button v-if="isManager" @click="goToEditChocolate(chocolate.id)">Izmeni</button>
               <button v-if="isManager" @click="deleteChocolate(chocolate.id)">Obriši</button>
               <button v-if="isWorker" @click="editQuantity(chocolate.id)">Izmeni količinu</button>
+              <button v-if="isCustomer" @click="openQuantityForm(chocolate.id)">Dodaj u korpu</button>
             </td>
           </tr>
         </tbody>
       </table>
       <h2>Komentari</h2>
       <ul>
-        <li v-for="comment in comments" :key="comment.id">
+        <li v-for="comment in approvedComments" :key="comment.id">
           <strong>{{ comment.customer }}</strong>: {{ comment.text }} ({{ comment.rating }}/5)
         </li>
       </ul>
+      
+      <div v-if="isManager || isAdmin">
+        <h2>Komentari na čekanju</h2>
+        <ul>
+          <li v-for="comment in pendingComments" :key="comment.id">
+            <strong>{{ comment.customer }}</strong>: {{ comment.text }} ({{ comment.rating }}/5) status: {{ comment.status }}
+            <button v-if="isManager" @click="updateCommentStatus(comment, 'Odobreno')">Odobri</button>
+            <button v-if="isManager" @click="updateCommentStatus(comment, 'Odbijeno')">Odbij</button>
+          </li>
+        </ul>
+      </div>
+      
+      
+      <!-- Forma za dodavanje komentara -->
+      <div v-if="canLeaveComment">
+        <h2>Ostavite komentar i ocenu</h2>
+        <form @submit.prevent="submitComment">
+          <textarea v-model="newCommentText" placeholder="Unesite vaš komentar" required></textarea>
+          <label for="rating">Ocena:</label>
+          <select v-model="newCommentRating" required>
+            <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+          </select>
+          <button type="submit">Pošalji</button>
+        </form>
+      </div>
+
       <div v-if="isManager">
         <h2>Dodaj radnika</h2>
         <button @click="goToAddWorker">Dodaj radnika</button>
@@ -61,16 +91,18 @@
 
     <!-- Modal za izmenu količine -->
     <div v-if="showQuantityForm">
-      <h3>Izmeni količinu čokolade</h3>
-      <form @submit.prevent="updateQuantity">
-        <input v-model="newQuantity" type="number" placeholder="Nova količina" required />
-        <button type="submit">Sačuvaj</button>
-        <button type="button" @click="showQuantityForm = false">Otkaži</button>
-      </form>
+      <div class="modal-overlay" @click="closeQuantityForm"></div>
+      <div class="modal-content">
+        <h3>Izaberite količinu</h3>
+        <form @submit.prevent="confirmAddToCart">
+          <input v-model.number="selectedQuantities[currentChocolateId]" type="number" :max="currentChocolateQuantity" min="1" required />
+          <button type="submit">Dodaj</button>
+          <button type="button" @click="closeQuantityForm">Otkaži</button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
-
 
 <script>
 import axios from 'axios';
@@ -81,10 +113,15 @@ export default {
       factory: null,
       chocolates: [],
       comments: [],
-      currentUser: null, // dodato za praćenje ulogovanog korisnika
+      currentUser: null,
       showQuantityForm: false,
       currentChocolateId: null,
-      newQuantity: 0
+      currentChocolateQuantity: 0,
+      newQuantity: 0,
+      selectedQuantities: {}, // Dodato za praćenje količina čokolada
+      newCommentText: '',
+      newCommentRating: null,
+      approvedPurchases: []
     };
   },
   mounted() {
@@ -93,18 +130,34 @@ export default {
   },
   computed: {
     isManager() {
-      console.log('Checking if user is manager:', this.currentUser);
       return this.currentUser && this.currentUser.role === 'Manager';
     },
+    isAdmin(){
+      return this.currentUser && this.currentUser.role === 'Administrator';
+    },
     isWorker() {
-      console.log('Checking if user is worker:', this.currentUser);
-      console.log('Factory:', this.factory);
-      if (this.currentUser && this.currentUser.role === 'Worker' && this.factory && Array.isArray(this.factory.workerIds)) {
-        console.log('Worker IDs:', this.factory.workerIds);
-        console.log('Current User ID:', this.currentUser.id);
-        return this.factory.workerIds.includes(this.currentUser.id.toString());
+      return this.currentUser && this.currentUser.role === 'Worker' && this.factory && this.factory.workerIds.includes(this.currentUser.id.toString());
+    },
+    isCustomer() {
+      return this.currentUser && this.currentUser.role === 'Customer';
+    },
+    isManagerOfFactory() {
+      return this.currentUser && this.currentUser.role === 'Manager' && this.factory && this.factory.managerId === this.currentUser.id;
+    },
+    filteredChocolates() {
+      if (this.isCustomer) {
+        return this.chocolates.filter(chocolate => chocolate.quantity > 0);
       }
-      return false;
+      return this.chocolates;
+    },
+    canLeaveComment() {
+      return this.isCustomer && this.approvedPurchases.length > 0;
+    },
+    approvedComments() {
+    return this.comments.filter(comment => comment.status === 'Odobreno');
+    },
+    pendingComments() {
+      return this.comments.filter(comment => comment.status !== 'Odobreno');
     }
   },
   methods: {
@@ -116,6 +169,7 @@ export default {
         factory.locationAddress = await this.fetchLocationAddress(factory.location);
         factory.workerIds = factory.workerIds ? factory.workerIds.map(id => id.trim()) : [];
         this.factory = factory;
+        await this.fetchCurrentUser();
         this.chocolates = await this.fetchChocolates(factoryId);
         this.comments = await this.fetchComments(factoryId);
       } catch (error) {
@@ -134,7 +188,11 @@ export default {
     async fetchChocolates(factoryId) {
       try {
         const response = await axios.get(`/api/chocolates?factoryId=${factoryId}`);
-        return response.data;
+        let chocolates = response.data;
+        if (this.currentUser && this.currentUser.role === 'Customer') {
+          chocolates = chocolates.filter(chocolate => chocolate.quantity > 0);
+        }
+        return chocolates;
       } catch (error) {
         console.error('Error loading chocolates:', error);
         return [];
@@ -158,10 +216,30 @@ export default {
           }
         });
         this.currentUser = response.data;
-        console.log('Fetched current user:', this.currentUser);
+        await this.fetchApprovedPurchases();
       } catch (error) {
         console.error('Error fetching current user:', error);
         this.currentUser = null;
+      }
+    },
+    async updateCommentStatus(comment, status) {
+      try {
+        await axios.put(`/api/comments/${comment.id}/status`, { status });
+        comment.status = status;
+        this.fetchComments(this.factory.id); // Ponovo učitava komentare nakon ažuriranja
+      } catch (error) {
+        console.error('Error updating comment status:', error);
+      }
+    },
+    async fetchApprovedPurchases() {
+      try {
+        const response = await axios.get(`/api/purchases/user/${this.currentUser.id}`);
+        this.approvedPurchases = response.data.filter(purchase => 
+          purchase.status === 'Odobreno' && purchase.factory === this.factory.id
+        );
+      } catch (error) {
+        console.error('Error fetching approved purchases:', error);
+        this.approvedPurchases = [];
       }
     },
     getFactoryImage(imagePath) {
@@ -189,8 +267,12 @@ export default {
       this.$router.push({ name: 'AddChocolate', params: { factoryId } });
     },
     goToAddWorker() {
-      const factoryId = this.factory.id; // Uzimamo ID fabrike
-      this.$router.push({ name: 'CreateWorker', params: { factoryId } }); // Prosleđujemo ID fabrike
+      const factoryId = this.factory.id;
+      this.$router.push({ name: 'CreateWorker', params: { factoryId } });
+    },
+    goToPurchases(factoryId) {
+      const managerId = this.currentUser.id;
+      this.$router.push({ name: 'FactoryPurchases', params: { factoryId, managerId } });
     },
     async deleteChocolate(chocolateId) {
       try {
@@ -219,6 +301,60 @@ export default {
       } catch (error) {
         console.error('Error updating quantity:', error);
       }
+    },
+    openQuantityForm(chocolateId) {
+      this.currentChocolateId = chocolateId;
+      const chocolate = this.chocolates.find(choco => choco.id === chocolateId);
+      this.currentChocolateQuantity = chocolate ? chocolate.quantity : 0;
+      this.showQuantityForm = true;
+    },
+    closeQuantityForm() {
+      this.showQuantityForm = false;
+      this.currentChocolateId = null;
+      this.currentChocolateQuantity = 0;
+    },
+    async confirmAddToCart() {
+      const chocolateId = this.currentChocolateId;
+      const quantity = this.selectedQuantities[chocolateId];
+      if (!quantity || quantity <= 0) {
+        alert("Unesite validnu količinu.");
+        return;
+      }
+
+      const chocolate = this.chocolates.find(choco => choco.id === chocolateId);
+      if (quantity > chocolate.quantity) {
+        alert("Nema dovoljno čokolade na stanju.");
+        return;
+      }
+
+      try {
+        await axios.post(`/api/carts/user/${this.currentUser.id}`, {
+          chocolateId,
+          quantity
+        });
+
+        alert('Čokolada je dodata u korpu.');
+        this.closeQuantityForm();
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+      }
+    },
+    async submitComment() {
+      try {
+        const response = await axios.post('/api/comments', {
+          customer: this.currentUser.id,
+          factory: this.factory.id,
+          text: this.newCommentText,
+          rating: this.newCommentRating,
+          status: 'Obrada'
+        });
+        this.comments.push(response.data);
+        this.newCommentText = '';
+        this.newCommentRating = null;
+        alert('Komentar je uspešno dodat.');
+      } catch (error) {
+        console.error('Error submitting comment:', error);
+      }
     }
   }
 }
@@ -239,5 +375,24 @@ th, td {
   border: 1px solid #ccc; /* Dodan border na ćelije tabele */
   padding: 8px;
   text-align: left;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  z-index: 1001;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 </style>

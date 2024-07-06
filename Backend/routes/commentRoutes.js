@@ -8,5 +8,6 @@ router.get('/', commentController.getComments);
 router.get('/factory/:factoryId', commentController.getCommentsByFactory);
 router.put('/:id', commentController.updateComment);
 router.delete('/:id', commentController.deleteComment);
+router.put('/:id/status', commentController.updateCommentStatus);
 
 module.exports = router;

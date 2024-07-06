@@ -29,7 +29,7 @@ class PurchaseDAO {
   async updatePurchase(purchaseId, updateData) {
     const purchaseIndex = this.purchases.findIndex((purchase) => purchase.id === purchaseId);
     if (purchaseIndex !== -1) {
-      this.purchases[purchaseIndex] = { ...this.purchases[purchaseIndex], ...updateData };
+      this.purchases[purchaseIndex] = new Purchase({ ...this.purchases[purchaseIndex], ...updateData });
       this.saveToCSV();
       return this.purchases[purchaseIndex];
     }
@@ -44,6 +44,10 @@ class PurchaseDAO {
       return true;
     }
     return false;
+  }
+
+  async getPurchasesByUser(userId) {
+    return this.purchases.filter((purchase) => purchase.customer === userId);
   }
 
   saveToCSV() {

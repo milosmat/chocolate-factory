@@ -1,5 +1,6 @@
 const userDAO = require('../dao/userDAO');
 const chocolateFactoryDAO = require('../dao/chocolateFactoryDAO');
+const bcrypt = require('bcryptjs');
 
 class UserService {
   async createUser(userData) {
@@ -35,6 +36,11 @@ class UserService {
       return user;
     }
     return null;
+  }
+
+  async changePassword(userId, newPassword) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userDAO.updateUser(userId, { password: hashedPassword });
   }
 }
 
