@@ -14,7 +14,7 @@
         </p>
         <p><strong>Datum rođenja:</strong> <input type="date" v-model="user.dateOfBirth" /></p>
         <p v-if="user.role === 'Customer'"><strong>Poeni:</strong> {{ user.points }}</p>
-        <p v-if="user.role === 'Customer'"><strong>Tip kupca:</strong> <input v-model="user.customerType" /></p>
+        <p v-if="user.role === 'Customer'"><strong>Tip kupca:</strong> {{ customerType ? customerType.name : 'N/A' }}</p>
         <button @click="updateProfile">Ažuriraj profil</button>
         <h2>Promena šifre</h2>
         <p><strong>Nova šifra:</strong> <input type="password" v-model="newPassword" /></p>
@@ -34,8 +34,9 @@
     data() {
       return {
         user: null,
-        newPassword: '',       // Dodato
-        confirmPassword: ''    // Dodato
+        customerType: null,
+        newPassword: '',
+        confirmPassword: ''
       };
     },
     async created() {
@@ -52,6 +53,18 @@
             }
           });
           this.user = response.data;
+  
+          // Proveri i ažuriraj customerType korisnika
+          await this.updateCustomerType();
+  
+          if (this.user.customerType) {
+            const typeResponse = await axios.get(`/api/customer-types/${this.user.customerType}`, {
+              headers: {
+                'x-auth-token': token
+              }
+            });
+            this.customerType = typeResponse.data;
+          }
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
@@ -61,6 +74,8 @@
           const userId = this.$route.params.userId;
           await axios.put(`/api/users/${userId}`, this.user);
           alert('Profil uspešno ažuriran.');
+          // Ponovo učitaj profil kako bi se prikazao ažurirani tip kupca
+          await this.fetchUserProfile();
         } catch (error) {
           console.error('Error updating profile:', error);
         }
@@ -85,6 +100,20 @@
           this.confirmPassword = '';
         } catch (error) {
           console.error('Error changing password:', error);
+        }
+      },
+      async updateCustomerType() {
+        try {
+          const userId = this.$route.params.userId;
+          const token = localStorage.getItem('token');
+          const response = await axios.put(`/api/users/${userId}/update-customer-type`, {}, {
+            headers: {
+              'x-auth-token': token
+            }
+          });
+          this.user = response.data; // Update the user object with the new customer type
+        } catch (error) {
+          console.error('Error updating customer type:', error);
         }
       }
     }

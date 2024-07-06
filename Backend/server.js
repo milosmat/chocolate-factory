@@ -13,6 +13,7 @@ const purchaseRoutes = require('./routes/purchaseRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const authenticateJWT = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
+const customerTypeRoutes = require('./routes/customerTypeRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -34,6 +35,7 @@ app.use('/api/carts', authenticateJWT, cartRoutes);
 app.use('/api/purchases', authenticateJWT, purchaseRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/customer-types', customerTypeRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

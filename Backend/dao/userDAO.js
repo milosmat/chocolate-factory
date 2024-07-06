@@ -72,7 +72,6 @@ class UserDAO {
     const userIndex = this.users.findIndex((user) => user.id === userId);
     if (userIndex !== -1) {
       const updatedUser = new User({ ...this.users[userIndex], ...updateData });
-      await updatedUser.save();
       this.users[userIndex] = updatedUser;
       this.serializer.toCSV(this.filePath, this.users);
       return this.users[userIndex];

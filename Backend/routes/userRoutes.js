@@ -11,4 +11,6 @@ router.delete('/:id', authMiddleware, userController.deleteUser);
 router.put('/:userId/change-password', userController.changePassword);
 router.get('/rest/suspicious-users', authMiddleware, userController.getSuspiciousUsers);
 router.put('/block-user/:id', authMiddleware, userController.blockUser);
+router.put('/:id/update-customer-type', authMiddleware, userController.updateCustomerType);
+
 module.exports = router;

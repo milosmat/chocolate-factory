@@ -99,3 +99,12 @@ exports.blockUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+exports.updateCustomerType = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await userService.updateCustomerType(userId);
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

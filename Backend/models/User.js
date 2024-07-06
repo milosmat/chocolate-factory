@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
+const customerTypeService = require('../services/customerTypeService');
 
 class User {
   constructor({ id, username, password, firstName, lastName, gender, dateOfBirth, role, points, customerType, isBlocked }) {
@@ -75,6 +76,14 @@ class User {
     await user.save();
     return user;
   }
+  updateCustomerType() {
+    const customerType = customerTypeService.getCustomerTypeByPoints(this.points);
+    if (customerType) {
+      this.customerTypeId = customerType.id;
+    }
+  }
 }
+
+
 
 module.exports = User;

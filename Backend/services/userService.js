@@ -18,7 +18,29 @@ class UserService {
   async updateUser(userId, updateData) {
     return await userDAO.updateUser(userId, updateData);
   }
-  
+
+  async updateCustomerType(userId) {
+    const user = await userDAO.getUserById(userId);
+    console.log('Updating user:', user); // Dodato za debug
+    if (user) {
+      // Provera trenutnog broja poena i ažuriranje tipa kupca
+      let newCustomerTypeId = null;
+      if (user.points > 80) {
+        newCustomerTypeId = 2; // ID za VIP
+      } else if (user.points > 50) {
+        newCustomerTypeId = 1; // ID za Regular
+      }else{
+        newCustomerTypeId = 0;
+      }
+      
+      // Ažuriraj user objekt
+      user.customerType = newCustomerTypeId;
+      console.log('Updating user:', user); // Dodato za debug
+      await userDAO.updateUser(userId, user);
+      return user;
+    }
+    throw new Error('User not found');
+  }
   async getSuspiciousUsers() {
     return await userDAO.getSuspiciousUsers();
   }
