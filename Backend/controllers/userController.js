@@ -9,13 +9,22 @@ exports.createUser = async (req, res) => {
   }
 };
 
+exports.getAvailableManagers = async (req, res) => {
+  try {
+    const availableManagers = await userService.getAvailableManagers();
+    res.status(200).json(availableManagers);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 exports.getUserById = async (req, res) => {
   try {
     const user = await userService.getUserById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -24,32 +33,78 @@ exports.getUserById = async (req, res) => {
 exports.getUsers = async (req, res) => {
   try {
     const users = await userService.getUsers();
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ message: error.message });
-    }
-    };
-    
-    exports.updateUser = async (req, res) => {
-    try {
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
     const user = await userService.updateUser(req.params.id, req.body);
     if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
-    } catch (error) {
+    res.status(200).json(user);
+  } catch (error) {
     res.status(400).json({ message: error.message });
-    }
-    };
-    
-    exports.deleteUser = async (req, res) => {
-    try {
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
     const user = await userService.deleteUser(req.params.id);
     if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.json({ message: 'User deleted' });
-    } catch (error) {
+    res.status(200).json({ message: 'User deleted' });
+  } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const newPassword = req.body.password;
+    await userService.changePassword(userId, newPassword);
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.getSuspiciousUsers = async (req, res) => {
+  console.log('Received request for suspicious users');
+  try {
+    const suspiciousUsers = await userService.getSuspiciousUsers();
+    console.log('Suspicious users:', suspiciousUsers); // Dodato za debug
+    res.status(200).json(suspiciousUsers);
+  } catch (error) {
+    console.error('Error fetching suspicious users:', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+exports.blockUser = async (req, res) => {
+  console.log('Received request to block user:', req.params.id); // Dodato za debug
+  try {
+    const user = await userService.blockUser(req.params.id);
+    console.log('Blocked user:', user); // Dodato za debug
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    };
+    res.status(200).json({ message: 'User blocked successfully' });
+  } catch (error) {
+    console.error('Error blocking user:', error);
+    res.status(400).json({ message: error.message });
+  }
+};
+exports.updateCustomerType = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await userService.updateCustomerType(userId);
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

@@ -1,5 +1,5 @@
 class Purchase {
-  constructor({ id, purchaseId, chocolates, factory, dateTime, totalPrice, customer, status }) {
+  constructor({ id, purchaseId, chocolates, factory, dateTime, totalPrice, customer, status, managerMessage }) {
     this.id = id || '';
     this.purchaseId = purchaseId || '';
     this.chocolates = chocolates || [];
@@ -8,6 +8,7 @@ class Purchase {
     this.totalPrice = parseFloat(totalPrice) || 0;
     this.customer = customer || '';
     this.status = status || '';
+    this.managerMessage = managerMessage || '';
   }
 
   toCSV() {
@@ -19,7 +20,8 @@ class Purchase {
       this.dateTime.toISOString(),
       this.totalPrice,
       this.customer,
-      this.status
+      this.status,
+      this.managerMessage
     ].join('|');
   }
 
@@ -33,7 +35,8 @@ class Purchase {
       dateTime: new Date(fields[4]),
       totalPrice: parseFloat(fields[5]),
       customer: fields[6],
-      status: fields[7]
+      status: fields[7],
+      managerMessage: fields[8]
     });
   }
 }
