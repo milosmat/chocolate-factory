@@ -1,0 +1,14 @@
+1|Milk Delight|2.5|Milk Chocolate|1|Standard|100|Delicious milk chocolate.|../assets/images/chocolate_1.png|available|50
+2|Dark Temptation|3|Dark Chocolate|1|Premium|150|Rich dark chocolate.|../assets/images/chocolate_2.png|not available|20
+3|White Wonder|2.8|White Chocolate|1|Standard|120|Smooth white chocolate.|../assets/images/chocolate_3.png|available|30
+4|Almond Joy|3.2|Milk Chocolate|2|Nuts|130|Milk chocolate with almonds.|../assets/images/chocolate_4.png|available|40
+5|Hazelnut Heaven|3.5|Dark Chocolate|2|Nuts|140|Dark chocolate with hazelnuts.|../assets/images/chocolate_5.png|not available|15
+6|Caramel Bliss|3.1|Milk Chocolate|2|Caramel|110|Milk chocolate with caramel filling.|../assets/images/chocolate_6.png|available|25
+7|Mint Magic|2.9|Dark Chocolate|3|Mint|125|Dark chocolate with mint flavor.|../assets/images/chocolate_7.png|available|60
+8|Strawberry Dream|2.7|White Chocolate|3|Fruit|115|White chocolate with strawberry pieces.|../assets/images/chocolate_8.png|not available|10
+9|Orange Zest|3|Dark Chocolate|3|Fruit|135|Dark chocolate with orange zest.|../assets/images/chocolate_9.png|available|35
+10|Coffee Crunch|3.4|Milk Chocolate|4|Coffee|145|Milk chocolate with coffee crunch.|../assets/images/chocolate_10.png|available|50
+11|Coconut Paradise|3.3|White Chocolate|4|Coconut|130|White chocolate with coconut flakes.|../assets/images/chocolate_11.png|not available|5
+12|Berry Bliss|3.2|Dark Chocolate|4|Berry|150|Dark chocolate with berry filling.|../assets/images/chocolate_12.png|available|45
+13|Updated Chocolate Name|3.5|Dark Chocolate||Premium|150|Updated description|updated_image_url|Available|100
+14|Grand Milka|42|asd||asd|42|asd|asd|Out of Stock|0
