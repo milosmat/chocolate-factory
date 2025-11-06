@@ -127,6 +127,7 @@ export default {
     async updateFactoryStatus(factory) {
       if (!factory.workingHours) {
         console.warn(`Factory ${factory.name} does not have working hours defined.`);
+        console.log('factory rating: ', factory.rating);
         factory.status = 'Closed';
         await this.updateFactoryInCSV(factory);
         return;

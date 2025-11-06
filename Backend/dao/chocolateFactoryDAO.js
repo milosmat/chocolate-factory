@@ -11,9 +11,9 @@ class ChocolateFactoryDAO {
   }
 
   async createChocolateFactory(factoryData) {
-    factoryData.rating = 0.0;
     const factory = new ChocolateFactory(factoryData);
     console.log("Factory Data: ", factory);
+    factory.rating = 0.0;
     factory.id = this.getNextId();
     this.factories.push(factory);
     this.saveToCSV();

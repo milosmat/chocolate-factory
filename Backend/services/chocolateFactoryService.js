@@ -12,11 +12,11 @@ class ChocolateFactoryService {
       status: factoryData.status,
       location: factoryData.location, // ispravno postavljen ID kreirane lokacije
       logo: factoryData.logo,
-      rating: factoryData.rating || 0,
+      rating: factoryData.rating,
       managerId: factoryData.managerId,
       workerIds: factoryData.workerIds || []
     };
-
+    
     const factory = new ChocolateFactory(factoryDataWithLocation);
     console.log("Factory Data with Location: ", factory); // Dodato za proveru podataka o fabrici
     return await chocolateFactoryDAO.createChocolateFactory(factory);

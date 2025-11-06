@@ -54,7 +54,7 @@
             <td>{{ getChocolateNames(purchase.chocolates).join(', ') }}</td>
             <td>{{ purchase.totalPrice }}</td>
             <td>{{ new Date(purchase.dateTime).toLocaleDateString() }}</td>
-            <td>{{ purchase.status }}</td>
+            <td>{{ purchase.status }} {{purchase.managerMessage}}</td>
             <td>
               <button v-if="purchase.status === 'Obrada'" @click="cancelOrder(purchase.id)">Otkaži</button>
             </td>

@@ -60,6 +60,7 @@ export default {
         city: '',
         postalCode: ''
       },
+      rating: '0.0',
       workingHours: '',
       logo: null,
       availableManagers: [],
@@ -176,7 +177,7 @@ export default {
       formData.append('name', this.name);
       formData.append('workingHours', this.workingHours);
       formData.append('logo', this.logo);
-
+      formData.append('rating', this.rating);
       if (this.showManagerForm) {
         if (this.newManager.password !== this.newManager.confirmPassword) {
           console.error('Passwords do not match!');

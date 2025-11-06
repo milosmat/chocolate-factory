@@ -3,8 +3,11 @@
 3|menadzer|$2a$10$XUE65AUxdA/wxU.5NyUeIebZCl.LYJng5wkacCCUKLdfJJsYwcg66|mena|dzer|M|1999-01-04|Manager|0||
 4|radnik|$2b$10$D3wZbV.krMDPm7ARbU6lgOhn0Z4aswWn/l4vc80cYRubEXC9DJVQm|rad|nik|M|1998-01-05|Worker|0||
 5|worker|$2b$10$zWZS.z2LQH22ZnIRUOGGreQ4AvKz9UaAoCrxuyceIO734UT0LCV.y|wor|ker|M|2003-06-10|Worker|0||
-6|customer|$2b$10$rS/cnf1i164d6SqlHHMD0e32OIYbJKmZldK14EH/ULr7asx04q4K6|custo|mer|M|2004-01-07|Customer|60|1|
+6|customer|$2b$10$rS/cnf1i164d6SqlHHMD0e32OIYbJKmZldK14EH/ULr7asx04q4K6|custo|mer|M|2004-01-07|Customer|65.389|1|true
 7|menadzer2|$2b$10$wtTFGSTNsWlD3Em9gQavPuIqf5GXlaWyBLgrhXL2T1ZTS2hR4stNy|marko|markovic|Muski|2002-04-03|Manager|0||
 8|kupac|$2b$10$mgodlMyG.gkFFwMGtopqseNA8pExBhBYCL6pTgjhxngYWoBGBDnra|ku|pac|muski|2002-04-03|Customer|0||true
 9|manager2|$2b$10$kcevDEA9KMieEwsVvsLsie9bAptYApZcnwApCHJ7QdvH6ATMp22Em|mana|ger|Muski|2001-01-02|Manager|0||
 10|radnik|$2b$10$zu9C31cw46MTrPU4.qpOR.OeIpX1/7Au7BJMAmTBXtMWoQq95KqAi|mar|ko|Muski|2002-02-05|Worker|0||
+11|test|$2b$10$OdbFPoWjUxaBQg4thXqA1eFIWPXKWeNlH4LT9cwzUyatMk3wFyNzS|te|st|Muski|2009-03-02|Customer|0||
+12|testman|$2b$10$3u61wqb9DbbAHF38wX.YpuQhSbuYOhCxdYS.C5FSXBZlgnCYa01q6|tes|t|Muski|2001-02-03|Manager|0||
+13|men|$2b$10$85CLTMdkyPNaHd0/HoLQpeReiE9t4rW8XYRwkiRTrQe3aKHiMgUjC|asa|asd|Muski|2002-03-02|Manager|0||
