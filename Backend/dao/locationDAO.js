@@ -11,13 +11,17 @@ class LocationDAO {
   }
 
   async createLocation(locationData) {
-    const location = new Location(locationData);
+    const { street, city, postalCode, latitude, longitude } = locationData;
+    if (!street || !city || !postalCode || latitude === undefined || longitude === undefined) {
+      throw new Error('Incomplete location data');
+    }
+    const address = `${street}, ${city}, ${postalCode}`;
+    const location = new Location({ longitude, latitude, address });
     location.id = this.getNextId();
     this.locations.push(location);
     this.saveToCSV();
     return location;
   }
-
   async getAllLocations() {
     return this.locations;
   }
@@ -29,7 +33,12 @@ class LocationDAO {
   async updateLocation(locationId, updateData) {
     const locationIndex = this.locations.findIndex(location => location.id === locationId);
     if (locationIndex !== -1) {
-      this.locations[locationIndex] = { ...this.locations[locationIndex], ...updateData };
+      const updatedLocationData = {
+        ...this.locations[locationIndex],
+        ...updateData,
+        address: `${updateData.street || this.locations[locationIndex].street}, ${updateData.city || this.locations[locationIndex].city}, ${updateData.postalCode || this.locations[locationIndex].postalCode}`
+      };
+      this.locations[locationIndex] = new Location(updatedLocationData);
       this.saveToCSV();
       return this.locations[locationIndex];
     }
@@ -47,7 +56,7 @@ class LocationDAO {
   }
 
   saveToCSV() {
-    this.serializer.toCSV(this.filePath, this.locations.map(location => location.toCSV()));
+    this.serializer.toCSV(this.filePath, this.locations);
   }
 
   loadFromCSV() {

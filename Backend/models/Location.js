@@ -21,7 +21,7 @@ class Location {
       id: fields[0],
       longitude: parseFloat(fields[1]),
       latitude: parseFloat(fields[2]),
-      address: fields[3]
+      address: fields[3].replace(/\r/g, '')
     });
   }
 }

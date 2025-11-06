@@ -33,13 +33,13 @@ class CommentDAO {
   async updateComment(commentId, updateData) {
     const commentIndex = this.comments.findIndex((comment) => comment.id === commentId);
     if (commentIndex !== -1) {
-      this.comments[commentIndex] = { ...this.comments[commentIndex], ...updateData };
+      this.comments[commentIndex] = new Comment({ ...this.comments[commentIndex], ...updateData });
       this.saveToCSV();
       return this.comments[commentIndex];
     }
     return null;
   }
-
+  
   async deleteComment(commentId) {
     const commentIndex = this.comments.findIndex((comment) => comment.id === commentId);
     if (commentIndex !== -1) {

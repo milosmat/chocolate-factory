@@ -25,6 +25,15 @@ class ChocolateService {
     return await chocolateDAO.updateChocolate(chocolateId, updateData);
   }
 
+  async updateChocolateQuantity(chocolateId, quantity) {
+    const chocolate = await chocolateDAO.getChocolateById(chocolateId);
+    if (!chocolate) {
+      throw new Error('Chocolate not found');
+    }
+    chocolate.quantity = quantity;
+    await chocolateDAO.updateChocolate(chocolateId, chocolate);
+    return chocolate;
+  }
 
   async deleteChocolate(chocolateId) {
     return await chocolateDAO.deleteChocolate(chocolateId);

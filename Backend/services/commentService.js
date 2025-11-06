@@ -24,6 +24,12 @@ class CommentService {
   async deleteComment(commentId) {
     return await commentDao.deleteComment(commentId);
   }
+
+  async updateCommentStatus(commentId, status) {
+    const comment = await commentDao.getCommentById(commentId);
+    comment.status = status;
+    return await commentDao.updateComment(commentId, comment);
+  }
 }
 
 module.exports = new CommentService();

@@ -26,15 +26,20 @@ class CartDAO {
     return this.carts.find((cart) => cart.id === cartId);
   }
 
-  async updateCart(cartId, updateData) {
-    const cartIndex = this.carts.findIndex((cart) => cart.id === cartId);
+  async updateCart(cart) {
+    const cartIndex = this.carts.findIndex((c) => c.id === cart.id);
     if (cartIndex !== -1) {
-      this.carts[cartIndex] = { ...this.carts[cartIndex], ...updateData };
+      const updatedCart = new Cart(this.carts[cartIndex]);
+      updatedCart.chocolates = cart.chocolates;
+      updatedCart.totalPrice = cart.totalPrice;
+      updatedCart.itemQuantity = cart.itemQuantity;
+      this.carts[cartIndex] = updatedCart;
       this.saveToCSV();
-      return this.carts[cartIndex];
+      return updatedCart;
     }
     return null;
   }
+  
 
   async deleteCart(cartId) {
     const cartIndex = this.carts.findIndex((cart) => cart.id === cartId);
@@ -46,6 +51,12 @@ class CartDAO {
     return false;
   }
 
+  async getCartByUser(userId) {
+    return this.carts.filter((cart) => cart.user === userId);
+  }
+  async getCartByUserAndOrder(userId) {
+    return this.carts.filter((cart) => cart.user === userId && cart.isOrdered === 'false');
+  }
   saveToCSV() {
     this.serializer.toCSV(this.filePath, this.carts);
   }
