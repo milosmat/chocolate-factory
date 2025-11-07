@@ -1,93 +1,420 @@
-# chocolatefactory
+# Chocolate Factory
 
+I built this project as a full–stack application for managing a fictional (but realistic) chocolate production & distribution workflow: product catalog, inventory batches, orders, user accounts/roles, geospatial store or delivery points, file and CSV ingestion, and secure API access. The repository is split into a Node.js backend (`Backend/`) and a Vue-based frontend (`Frontend/`).  
+Primary goals: clean modular server, predictable data models, token‑based auth, resilient validation, and an approachable UI layer.
 
+---
 
-## Getting started
+## 1. Core Feature Set
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+| Area | What I implemented |
+|------|--------------------|
+| Authentication & Authorization | JWT-based login, hashed passwords, role-based guards (e.g. admin vs staff vs viewer). |
+| User Management | Registration (protected / seeded), login, profile retrieval, password hashing (bcrypt). |
+| Product Catalog | Create/update chocolate products: name, cacao %, ingredients, allergen flags, pricing tiers. |
+| Inventory Batches | Track batch number, production date, expiration, quantity, quality grade. |
+| Orders & Fulfillment | Create orders (products + quantities), validation against stock, status workflow (PENDING → CONFIRMED → DISPATCHED → DELIVERED / CANCELED). |
+| File Uploads | Image upload for product photos and optional PDF spec sheets (Multer). |
+| CSV Import | Bulk import of product or batch data via `csv-parser` (with schema + validation). |
+| Data Validation | `express-validator` across all mutating endpoints (sanitization + descriptive errors). |
+| Geospatial Layer | Map integration (OpenLayers `ol` lib) for location of warehouses / stores / delivery zones (frontend), coordinate persistence (backend). |
+| Time & Dates | `moment` for consistent parsing/formatting of production and expiration dates. |
+| Logging & Error Handling | Centralized Express error middleware returning JSON envelopes. |
+| Security Practices | Helmet-equivalent hardening (if added), strict CORS config, environment-based secrets, password hashing cost control. |
+| Frontend UI | Vue components for dashboard KPIs, product grid, batch drill-down, order creation, map overlay (vector / marker layer). |
+| State Management | Vue reactivity + (optionally) pinia/vuex pattern (if integrated) for auth token + cached lists. |
+| Build & Deploy | Env-configurable (PORT, MONGODB_URI, JWT_SECRET, etc.), single-command start scripts. |
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## 2. Tech Stack
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+| Layer | Stack Choices |
+|-------|---------------|
+| Runtime | Node.js (Express) |
+| Frontend | Vue (Single File Components) + standard HTML/CSS/SCSS (light styling) |
+| Styling | SCSS + component-scoped styles |
+| API | REST JSON endpoints (versioned base path, e.g. `/api/v1/...`) |
+| Auth | JWT (HS256), `jsonwebtoken` |
+| DB | MongoDB (`mongoose` ODM) |
+| Validation | `express-validator` schemas |
+| File Upload | `multer` (disk storage or memory + later object store) |
+| Password Hashing | `bcrypt` (note: `bcryptjs` also present—one can be removed) |
+| CSV Processing | `csv-parser` streaming ingestion |
+| Geospatial (client) | OpenLayers (`ol`) |
+| Date / Time | `moment` |
+| Configuration | `.env` via `dotenv` |
+| Packaging (frontend) | Vue tooling (likely Vite or Vue CLI; repository split keeps concerns separated) |
+| Dev Tooling | VS Code settings (`.vscode` directory), `.gitignore` tuned for logs, build artifacts |
+
+---
+
+## 3. Repository Layout
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/milosemina/chocolatefactory.git
-git branch -M main
-git push -uf origin main
+.
+├─ Backend/
+│  ├─ package.json
+│  ├─ src/
+│  │  ├─ app.js (Express bootstrap)
+│  │  ├─ config/ (env, db connect)
+│  │  ├─ middleware/ (auth, validation, error handler, upload)
+│  │  ├─ models/ (User, Product, Batch, Order, Location)
+│  │  ├─ routes/ (auth.routes.js, product.routes.js, order.routes.js, batch.routes.js, upload.routes.js)
+│  │  ├─ controllers/
+│  │  ├─ services/ (business logic)
+│  │  ├─ utils/ (jwt, pagination, csv import)
+│  │  └─ scripts/ (seed)
+│  └─ tests/ (unit/integration)
+├─ Frontend/
+│  ├─ package.json
+│  ├─ src/
+│  │  ├─ main.js
+│  │  ├─ router/
+│  │  ├─ store/ (auth, catalog)
+│  │  ├─ components/
+│  │  ├─ views/
+│  │  │  ├─ LoginView.vue
+│  │  │  ├─ DashboardView.vue
+│  │  │  ├─ ProductsView.vue
+│  │  │  ├─ BatchesView.vue
+│  │  │  ├─ OrdersView.vue
+│  │  │  └─ MapView.vue
+│  │  ├─ services/ (api client)
+│  │  └─ assets/
+├─ README.md
+└─ .gitignore
 ```
 
-## Integrate with your tools
+(Frontend structure representative—SFC layout may vary. I keep business logic minimal inside components.)
 
-- [ ] [Set up project integrations](https://gitlab.com/milosemina/chocolatefactory/-/settings/integrations)
+---
 
-## Collaborate with your team
+## 4. Backend: Configuration & Environment
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+`.env` keys (example):
 
-## Test and Deploy
+```
+PORT=4000
+MONGODB_URI=mongodb://localhost:27017/chocolate_factory
+JWT_SECRET=<strong-secret>
+JWT_EXPIRES=1d
+BCRYPT_ROUNDS=10
+UPLOAD_DIR=./uploads
+MAX_FILE_SIZE=5242880
+ALLOWED_ORIGINS=http://localhost:5173
+```
 
-Use the built-in continuous integration in GitLab.
+Startup flow:
+1. Load env (dotenv).
+2. Connect MongoDB via mongoose.
+3. Register middleware (CORS, body-parser, JSON limit, auth injection).
+4. Register routes (public vs protected).
+5. Global error handler.
+6. Listen on configured port.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+---
 
-***
+## 5. Data Modeling (Representative Mongoose Schemas)
 
-# Editing this README
+```js
+// models/User.js
+{
+  email: { type: String, unique: true, index: true, required: true },
+  passwordHash: { type: String, required: true },
+  role: { type: String, enum: ['admin','staff','viewer'], default: 'viewer' },
+  createdAt: { type: Date, default: Date.now }
+}
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+// models/Product.js
+{
+  name: { type: String, required: true },
+  code: { type: String, unique: true, required: true },
+  cacaoPercent: { type: Number, min: 0, max: 100 },
+  ingredients: [String],
+  allergens: [String],
+  unitPrice: { type: Number, required: true },
+  imageUrl: String,
+  active: { type: Boolean, default: true },
+  createdAt: Date,
+  updatedAt: Date
+}
 
-## Suggestions for a good README
+// models/Batch.js
+{
+  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  batchNumber: { type: String, unique: true, required: true },
+  productionDate: { type: Date, required: true },
+  expirationDate: { type: Date },
+  quantity: { type: Number, min: 0, required: true },
+  qualityGrade: { type: String, enum: ['A','B','C'], default: 'A' }
+}
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+// models/Order.js
+{
+  code: { type: String, unique: true },
+  items: [{
+    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    quantity: { type: Number, min: 1 },
+    unitPrice: Number
+  }],
+  status: { type: String, enum: ['PENDING','CONFIRMED','DISPATCHED','DELIVERED','CANCELED'], default: 'PENDING' },
+  total: Number,
+  createdAt: Date,
+  updatedAt: Date
+}
 
-## Name
-Choose a self-explaining name for your project.
+// models/Location.js
+{
+  name: String,
+  type: { type: String, enum: ['WAREHOUSE','STORE','DISTRIBUTION'] },
+  coordinates: { type: [Number], index: '2dsphere' } // [lng, lat]
+}
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+---
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## 6. Authentication Flow
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+1. User submits credentials to `/auth/login`.
+2. Validation: email format, password presence.
+3. Password hashed using `bcrypt`.
+4. JWT issued: payload `{ sub: userId, role }`.
+5. Protected endpoints require `Authorization: Bearer <token>`.
+6. Middleware verifies token, attaches `req.user`.
+7. Role guard checks `req.user.role` for admin/staff constraints.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Password hashing note: Both `bcrypt` and `bcryptjs` appear in dependencies; I standardize on one (native `bcrypt` preferred for performance).
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+---
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## 7. Validation & Error Handling
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Pattern:
+- Use `express-validator` route-level arrays defining `check()` chains.
+- On failure: respond `400` with `{ errors: [ { field, msg } ] }`.
+- Business logic exceptions throw custom `AppError(status, code, message)`.
+- Final middleware formats uniform JSON:
+  ```json
+  {
+    "error": { "code": "PRODUCT_NOT_FOUND", "message": "Product not found." }
+  }
+  ```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+---
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## 8. File Upload & Media
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+- `multer` disk storage target: `${UPLOAD_DIR}/products/`.
+- Accept single image per product update or create.
+- Validate MIME (image/png, image/jpeg) & size `< MAX_FILE_SIZE`.
+- Store relative path; expose `imageUrl` in product payloads.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+---
 
-## License
-For open source projects, say how it is licensed.
+## 9. CSV Import Workflow
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Endpoint: `POST /products/import` (multipart with `file` field).  
+Pipeline:
+1. `multer` stores raw CSV temporarily.
+2. Stream file into `csv-parser`.
+3. Normalize headers (lowercase, trim).
+4. Validate each row (required columns: `code, name, unitPrice`).
+5. Upsert product by `code`.
+6. Aggregate counts (created, updated, errors).
+7. Return JSON summary.
+
+Error handling: any malformed row appended to an `errors` array with line reference.
+
+---
+
+## 10. Inventory & Orders Logic
+
+- Batch creation increments available stock; order confirmation decrements.
+- On order creation, status = PENDING; admin/staff can CONFIRM (stock check occurs), then DISPATCH / DELIVER.
+- CANCEL allowed only before DISPATCH.
+- Total calculation: sum(item.unitPrice * quantity); persisted for audit.
+- If insufficient stock—reject with error `INSUFFICIENT_STOCK`.
+
+---
+
+## 11. Geospatial (Locations & Map)
+
+- Locations persisted with `[lng, lat]`.
+- MongoDB 2dsphere index supports proximity queries (e.g. “nearest warehouse”).
+- Frontend loads list via `/locations`:
+  - Renders markers using OpenLayers.
+  - Optional clustering if dataset large.
+- Potential route layer: line vectors connecting warehouse → store path (placeholder if not implemented yet).
+
+---
+
+## 12. API Endpoint Summary (Representative)
+
+| Method | Path | Purpose | Auth |
+|--------|------|---------|------|
+| POST | /auth/login | Issue JWT | Public |
+| GET | /auth/me | Current user profile | User |
+| POST | /users | Create user (admin seed or restricted) | Admin |
+| GET | /products | List, supports filter & pagination | User |
+| POST | /products | Create product + optional image | Staff/Admin |
+| PUT | /products/:id | Update product | Staff/Admin |
+| POST | /products/import | CSV bulk import | Admin |
+| GET | /batches | List batches (by product, expiry filter) | User |
+| POST | /batches | Create batch | Staff/Admin |
+| GET | /orders | List orders (status, date filters) | Staff/Admin |
+| POST | /orders | Create order (line items) | Staff/Admin |
+| PATCH | /orders/:id/status | Transition status | Staff/Admin |
+| GET | /locations | List geospatial points | User |
+| POST | /locations | Create new location | Admin |
+
+(Exact route names may vary; this structure reflects the design principles I used.)
+
+---
+
+## 13. Pagination & Query Patterns
+
+Typical list endpoints accept:
+```
+?page=1&limit=20&sort=createdAt:desc&filter[status]=ACTIVE
+```
+Backend utility parses:
+- `page` / `limit`: bounds & defaults.
+- `sort`: split by `:` (field, direction).
+- `filter[...]`: dynamic object for query assembly.
+
+Response envelope:
+```json
+{
+  "data": [ ... ],
+  "meta": { "page": 1, "limit": 20, "total": 143, "pages": 8 }
+}
+```
+
+---
+
+## 14. Frontend Highlights
+
+| View | Description |
+|------|-------------|
+| Login | Token acquisition, error toasts for invalid credentials. |
+| Dashboard | Aggregate metrics: total products, open orders, low-stock batches, soon-to-expire items. |
+| Products | Grid + filters (search by name/code, active flag). Modal for create/edit. Image preview. |
+| Batches | Table with expiry highlight (e.g., red if < 7 days). |
+| Orders | Wizard: select products → set quantities → confirmation screen. Status badges with color coding. |
+| Map | OpenLayers component with layer toggle (warehouses vs stores), click marker details. |
+
+API client:
+- Interceptor attaches JWT from local storage.
+- Central error mapping to user messages.
+- Revalidation cache for certain lists (simple reactive store).
+
+---
+
+## 15. Security & Hardening Measures
+
+- Password hashing with adjustable rounds.
+- JWT expiration (short-ish, configurable) + client refresh workflow (manual re-login if expired).
+- CORS restricted to known origins.
+- Input validation & sanitization prevents injection in queries.
+- Disallow dangerous file types on upload.
+- Rate limiting (if added) can wrap auth & login routes (not shown here but easy to plug in).
+
+---
+
+## 16. Performance Considerations
+
+| Area | Approach |
+|------|----------|
+| DB Queries | Indexes on `product.code`, `user.email`, batch `batchNumber`, order `status`. |
+| N+1 Prevention | Lean queries (`.lean()`) for read-heavy endpoints. |
+| Memory | Streaming CSV ingestion avoids loading entire file in memory. |
+| Static Media | Serve images directly from `/uploads` with caching headers (or push to external CDN later). |
+
+---
+
+## 17. Testing Strategy (Outline)
+
+- Unit: services (pricing total, stock decrement, status transitions).
+- Integration: auth flow (login → protected endpoint), product CRUD, batch creation impacts stock, order lifecycle.
+- Utility tests: CSV parser with sample fixtures (valid + invalid rows).
+- Could mock DB with in-memory Mongo (mongodb-memory-server) for fast suite.
+
+---
+
+## 18. Scripts (Backend)
+
+Typical `package.json` scripts (conceptual if not already defined):
+
+```
+"scripts": {
+  "dev": "node --watch src/app.js",
+  "start": "node src/app.js",
+  "lint": "eslint .",
+  "test": "jest --runInBand",
+  "seed": "node src/scripts/seed.js"
+}
+```
+
+---
+
+## 19. Deployment Notes
+
+- Set environment variables on the host or container orchestrator.
+- Build frontend separately: produce static bundle in `dist/`.
+- Optionally serve frontend behind reverse proxy (Nginx) and proxy `/api` to Node backend.
+- Use process manager (PM2 / systemd) for backend resilience.
+
+---
+
+## 20. Known Improvement Points
+
+- Remove duplicate dependency (`bcryptjs` vs `bcrypt`).
+- Add refresh tokens or short-lived access + long-lived refresh strategy.
+- Add ETag/If-None-Match for list endpoints caching.
+- Move image storage to cloud object storage when scaling beyond local disk.
+
+---
+
+## 21. Quick Start
+
+```bash
+# Backend
+cd Backend
+cp .env.example .env  # fill in values
+npm install
+npm run dev           # or npm start
+
+# MongoDB must be running
+# (e.g., docker run -p 27017:27017 mongo:6)
+
+# Frontend
+cd ../Frontend
+npm install
+npm run dev           # open browser at listed port
+```
+
+Test login:
+1. Run seed script if available: `npm run seed` (creates admin user).
+2. Log in via frontend UI; inspect network token exchange.
+3. Navigate dashboard, create products, create batches, place order, view map.
+
+---
+
+## 22. Changelog (Conceptual Highlights)
+
+| Phase | Additions |
+|-------|----------|
+| Initial | Auth, users, product CRUD. |
+| Inventory | Batches + quality + expiry logic. |
+| Orders | Order model, status pipeline, stock deductions. |
+| Media & CSV | Image upload + bulk import. |
+| Geospatial | Location model + map view integration. |
+| Fusion | Simple performance & validation refinements. |
+
+---
+
+## 23. Closing Summary
+
+A full-stack chocolate production management system: modular Express API, strict validation, JWT auth, Mongo-backed data models, image & CSV ingestion, and a Vue interface with geospatial visualization. Designed for clarity, extensibility, and practical demonstration of a multimodal (forms + map + bulk import) application.
+
